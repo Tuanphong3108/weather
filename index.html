@@ -275,7 +275,7 @@
 
             <div>
                 <h3 class="text-xl font-semibold mb-2">Kiểu Icon</h3>
-                <div class="flex gap-4">
+                <div class="flex flex-col gap-2">
                     <label>
                         <input type="radio" name="icon-style" value="emoji" checked>
                         Emoji
@@ -283,6 +283,10 @@
                     <label>
                         <input type="radio" name="icon-style" value="material">
                         Material 3
+                    </label>
+                    <label>
+                        <input type="radio" name="icon-style" value="pixel">
+                        Google Pixel Weather
                     </label>
                 </div>
             </div>
@@ -331,8 +335,8 @@
             };
 
             const WEATHER_CODES = {
-                0: { emoji: "☀️", material: "wb_sunny", text: "Trời quang, mây tạnh", color: ["#4FC3F7", "#00BCD4"] },
-                1: { emoji: "🌤️", material: "partly_cloudy_day", text: "Trời quang, chủ yếu nắng", color: ["#64B5F6", "#81C784"] },
+                0: { emoji: "☀️", material: "wb_sunny", night_emoji: "🌙", night_material: "nightlight_round", text: "Trời quang, mây tạnh", color: ["#4FC3F7", "#00BCD4"] },
+                1: { emoji: "🌤️", material: "partly_cloudy_day", night_emoji: "☁️", night_material: "partly_cloudy_night", text: "Trời quang, chủ yếu nắng", color: ["#64B5F6", "#81C784"] },
                 2: { emoji: "⛅️", material: "cloudy", text: "Trời quang, mây rải rác", color: ["#A5D6A7", "#90A4AE"] },
                 3: { emoji: "☁️", material: "cloudy", text: "Trời nhiều mây", color: ["#B0BEC5", "#78909C"] },
                 45: { emoji: "🌫️", material: "foggy", text: "Sương mù", color: ["#ECEFF1", "#CFD8DC"] },
@@ -360,12 +364,45 @@
                 96: { emoji: "⚡️", material: "thunderstorm", text: "Dông bão có mưa đá nhẹ", color: ["#5D4037", "#4E342E"] },
                 99: { emoji: "⚡️", material: "thunderstorm", text: "Dông bão có mưa đá nặng", color: ["#4E342E", "#3E2723"] },
             };
+            
+            // PIXEL_ICONS: Thêm mã thời tiết và link icon Pixel của bro vào đây
+            const PIXEL_ICONS = {
+                '0': 'clear_day.png', '0_night': 'clear_night.png',
+                '1': 'partly_cloudy_day.png', '1_night': 'partly_cloudy_night.png',
+                '2': 'mostly_cloudy_day.png', '2_night': 'mostly_cloudy_night.png',
+                '3': 'cloudy.png', '3_night': 'cloudy.png',
+                '45': 'haze_fog_dust_smoke.png', '45_night': 'haze_fog_dust_smoke.png',
+                '48': 'haze_fog_dust_smoke.png', '48_night': 'haze_fog_dust_smoke.png',
+                '51': 'drizzle.png', '51_night': 'drizzle.png',
+                '53': 'drizzle.png', '53_night': 'drizzle.png',
+                '55': 'drizzle.png', '55_night': 'drizzle.png',
+                '56': 'mixed_rain_snow.png', '56_night': 'mixed_rain_snow.png',
+                '57': 'mixed_rain_snow.png', '57_night': 'mixed_rain_snow.png',
+                '61': 'showers_rain.png', '61_night': 'showers_rain.png',
+                '63': 'showers_rain.png', '63_night': 'showers_rain.png',
+                '65': 'heavy_rain.png', '65_night': 'heavy_rain.png',
+                '66': 'sleet_hail.png', '66_night': 'sleet_hail.png',
+                '67': 'sleet_hail.png', '67_night': 'sleet_hail.png',
+                '71': 'showers_snow.png', '71_night': 'showers_snow.png',
+                '73': 'showers_snow.png', '73_night': 'showers_snow.png',
+                '75': 'heavy_snow.png', '75_night': 'heavy_snow.png',
+                '77': 'flurries.png', '77_night': 'flurries.png',
+                '80': 'scattered_showers_day.png', '80_night': 'scattered_showers_night.png',
+                '81': 'scattered_showers_day.png', '81_night': 'scattered_showers_night.png',
+                '82': 'scattered_showers_day.png', '82_night': 'scattered_showers_night.png',
+                '85': 'scattered_snow_showers_day.png', '85_night': 'scattered_snow_showers_night.png',
+                '86': 'showers_snow.png', '86_night': 'showers_snow.png',
+                '95': 'isolated_scattered_thunderstorms_day.png', '95_night': 'isolated_scattered_thunderstorms_night.png',
+                '96': 'mixed_rain_hail_sleet.png', '96_night': 'mixed_rain_hail_sleet.png',
+                '99': 'mixed_rain_hail_sleet.png', '99_night': 'mixed_rain_hail_sleet.png',
+            };
 
+            // Link icon chi tiết. Bro thay bằng link ảnh Pixel của bro nhé
             const DETAIL_ICONS = {
-                humidity: { emoji: "💧", material: "humidity_mid" },
-                wind: { emoji: "💨", material: "air" },
-                wind_direction: { emoji: "➡️", material: "explore" },
-                uv: { emoji: "☀️", material: "wb_sunny" }
+                humidity: { emoji: "💧", material: "humidity_mid", pixel: "https://placehold.co/100x100?text=Humidity" },
+                wind: { emoji: "💨", material: "air", pixel: "windy_breezy.png" },
+                wind_direction: { emoji: "➡️", material: "explore", pixel: "https://placehold.co/100x100?text=Wind+Direction" },
+                uv: { emoji: "☀️", material: "wb_sunny", pixel: "https://placehold.co/100x100?text=UV" }
             };
             
             document.querySelector(`input[name="temp-unit"][value="${settings.tempUnit}"]`).checked = true;
@@ -392,11 +429,20 @@
                 const icon = DETAIL_ICONS[key];
                 if (settings.iconStyle === 'material') {
                     return `<span class="material-symbols-outlined text-3xl">${icon.material}</span>`;
+                } else if (settings.iconStyle === 'pixel') {
+                    return `<img src="${icon.pixel}" alt="${key} icon" class="w-8 h-8"/>`;
                 }
                 return `<span class="text-3xl">${icon.emoji}</span>`;
             }
 
-            const displayWeather = (currentData, dailyData, city, uvIndex) => {
+            // Đây là chỗ bro cần thay link này
+            const getPixelIconUrl = (weatherCode, isNight) => {
+                const pixelIcons = PIXEL_ICONS;
+                const iconKey = isNight ? `${weatherCode}_night` : `${weatherCode}`;
+                return pixelIcons[iconKey] || 'https://placehold.co/100x100?text=Pixel+Icon';
+            };
+
+            const displayWeather = (currentData, dailyData, city, uvIndex, timezone) => {
                 const tempInCelsius = currentData.temperature_2m;
                 let displayTemp = tempInCelsius.toFixed(1);
                 let tempUnitText = '°C';
@@ -415,12 +461,22 @@
 
                 const humidity = currentData.relative_humidity_2m;
                 const weatherCode = currentData.weather_code;
+
+                const localTime = new Date().toLocaleTimeString('en-US', { timeZone: timezone, hour12: false });
+                const localHour = parseInt(localTime.split(':')[0], 10);
+                const isNight = localHour >= 18 || localHour < 6;
                 
-                let icon = WEATHER_CODES[weatherCode]?.emoji || "❓";
+                let iconHtml;
+                const weatherCodeInfo = WEATHER_CODES[weatherCode];
                 if (settings.iconStyle === 'material') {
-                    icon = `<span class="material-symbols-outlined text-6xl">${WEATHER_CODES[weatherCode]?.material || "help"}</span>`;
+                    const materialIcon = isNight && weatherCodeInfo?.night_material ? weatherCodeInfo.night_material : weatherCodeInfo?.material;
+                    iconHtml = `<span class="material-symbols-outlined text-6xl">${materialIcon || "help"}</span>`;
+                } else if (settings.iconStyle === 'pixel') {
+                    const pixelIconUrl = getPixelIconUrl(weatherCode, isNight);
+                    iconHtml = `<img src="${pixelIconUrl}" alt="weather icon" class="w-24 h-24"/>`;
                 } else {
-                    icon = `<span class="text-6xl">${icon}</span>`;
+                    const emojiIcon = isNight && weatherCodeInfo?.night_emoji ? weatherCodeInfo.night_emoji : weatherCodeInfo?.emoji;
+                    iconHtml = `<span class="text-6xl">${emojiIcon || "❓"}</span>`;
                 }
 
                 setWeatherBackground(weatherCode);
@@ -428,7 +484,7 @@
                 const weatherHtml = `
                     <h2 class="capitalize">${city}</h2>
                     <div class="temp flex justify-center items-center">
-                        ${icon}
+                        ${iconHtml}
                         <span>${displayTemp}${tempUnitText}</span>
                     </div>
                     <div class="weather-details">
@@ -479,12 +535,21 @@
                     }
                     
                     const dailyWeatherCode = dailyData.weather_code[index];
-                    let dailyIcon = WEATHER_CODES[dailyWeatherCode]?.emoji || "❓";
+                    let dailyIconHtml;
+                    const dailyWeatherCodeInfo = WEATHER_CODES[dailyWeatherCode];
+                    if (settings.iconStyle === 'material') {
+                        dailyIconHtml = `<span class="material-symbols-outlined text-4xl">${dailyWeatherCodeInfo?.material || "help"}</span>`;
+                    } else if (settings.iconStyle === 'pixel') {
+                        const iconUrl = getPixelIconUrl(dailyWeatherCode, false); // Ban ngày
+                        dailyIconHtml = `<img src="${iconUrl}" alt="daily weather icon" class="w-16 h-16"/>`;
+                    } else {
+                        dailyIconHtml = `<span class="text-4xl">${dailyWeatherCodeInfo?.emoji || "❓"}</span>`;
+                    }
 
                     dailyCard.innerHTML = `
                         <p class="font-bold">${dayName}</p>
                         <div class="icon-placeholder">
-                            ${settings.iconStyle === 'material' ? `<span class="material-symbols-outlined text-4xl">${WEATHER_CODES[dailyWeatherCode]?.material || "help"}</span>` : `<span class="text-4xl">${dailyIcon}</span>`}
+                            ${dailyIconHtml}
                         </div>
                         <p class="font-medium">${tempMax}${tempUnitText} / ${tempMin}${tempUnitText}</p>
                     `;
@@ -563,7 +628,7 @@
                     const uvData = uvResponse.ok ? await uvResponse.json() : null;
                     const uvIndex = uvData?.daily?.uv_index_max?.[0];
 
-                    displayWeather(weatherData.current, weatherData.daily, cityName, uvIndex);
+                    displayWeather(weatherData.current, weatherData.daily, cityName, uvIndex, weatherData.timezone);
 
                 } catch (error) {
                     console.error("Lỗi:", error);
@@ -667,7 +732,7 @@
 
             currentLocationBtn.addEventListener('click', getWeatherByCurrentLocation);
 
-            const updateSettingsUI = () toogle {
+            const updateSettingsUI = () => {
                 document.querySelector(`input[name="temp-unit"][value="${settings.tempUnit}"]`).checked = true;
                 document.querySelector(`input[name="wind-unit"][value="${settings.windUnit}"]`).checked = true;
                 document.querySelector(`input[name="icon-style"][value="${settings.iconStyle}"]`).checked = true;
