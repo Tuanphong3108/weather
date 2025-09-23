@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự Báo Thời Tiết 🌦️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- Thêm manifest và icon cho PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            background-color: #1a202c;
+            overflow-x: hidden;
+        }
+
+        #weather-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            transition: background 1s ease-in-out;
+            background: linear-gradient(135deg, #1A202C, #2D3748);
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 3rem;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .search-box {
+            position: relative;
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        input {
+            flex-grow: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 9999px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: background-color 0.3s ease;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        input:focus {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        button {
+            background-color: #1A92FF;
+            color: #fff;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 9999px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        button:hover {
+            background-color: #0070e2;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        #settings-btn {
+            background-color: transparent;
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        #settings-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: rotate(30deg);
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 1rem;
+            margin-top: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .suggestions li {
+            padding: 0.75rem 1.5rem;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .suggestions li:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .weather-info {
+            padding: 2.5rem;
+            border-radius: 2rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            text-align: left;
+            transition: all 0.5s ease;
+        }
+        .weather-info h2 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        .weather-info .temp {
+            font-size: 5rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            font-size: 1.25rem;
+        }
+        
+        .forecast-section {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .forecast-section h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .forecast-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+        .forecast-card {
+            flex: 0 0 120px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .forecast-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+        }
+
+        .forecast-card .icon-placeholder {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-panel {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .settings-panel h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .settings-panel label {
+            display: block;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .location-btn {
+            background-color: #4A5568;
+        }
+        .location-btn:hover {
+            background-color: #2D3748;
+        }
+    </style>
+</head>
+<body>
+    <div id="weather-bg"></div>
+    <div class="container">
+        <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">⚙️</button>
+        <h1 class="font-extrabold text-white text-4xl mb-6">Dự Báo Thời Tiết</h1>
+        <div class="search-box">
+            <input type="text" id="city-input" placeholder="Nhập tên thành phố...">
+            <button id="search-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">Tìm Kiếm</button>
+            <button id="current-location-btn" class="location-btn text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">Vị trí hiện tại</button>
+            <ul id="suggestions" class="suggestions hidden"></ul>
+        </div>
+        <div id="weather-info" class="weather-info hidden">
+            <!-- Dữ liệu thời tiết sẽ được chèn vào đây bởi JavaScript -->
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="settings-panel hidden">
+            <h2 class="text-3xl font-bold mb-4">Cài Đặt</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-2">Đơn vị nhiệt độ</h3>
+                <div class="flex gap-4">
+                    <label>
+                        <input type="radio" name="temp-unit" value="celsius" checked>
+                        Celsius (°C)
+                    </label>
+                    <label>
+                        <input type="radio" name="temp-unit" value="fahrenheit">
+                        Fahrenheit (°F)
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-2">Đơn vị tốc độ gió</h3>
+                <div class="flex gap-4">
+                    <label>
+                        <input type="radio" name="wind-unit" value="ms" checked>
+                        m/s
+                    </label>
+                    <label>
+                        <input type="radio" name="wind-unit" value="kmh">
+                        km/h
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Kiểu Icon</h3>
+                <div class="flex gap-4">
+                    <label>
+                        <input type="radio" name="icon-style" value="emoji" checked>
+                        Emoji
+                    </label>
+                    <label>
+                        <input type="radio" name="icon-style" value="material">
+                        Material 3
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-600">
+                <h3 class="text-xl font-semibold mb-2">Vị trí</h3>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" id="auto-location-toggle">
+                    Tự động hiện thời tiết ở vị trí hiện tại
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Đăng ký Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cityInput = document.getElementById('city-input');
+            const searchBtn = document.getElementById('search-btn');
+            const weatherInfoDiv = document.getElementById('weather-info');
+            const suggestionsList = document.getElementById('suggestions');
+            const weatherBg = document.getElementById('weather-bg');
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsPanel = document.getElementById('settings-panel');
+            const currentLocationBtn = document.getElementById('current-location-btn');
+            const autoLocationToggle = document.getElementById('auto-location-toggle');
+            
+            // Sử dụng localStorage để ghi nhớ cài đặt
+            const settings = {
+                tempUnit: localStorage.getItem('tempUnit') || 'celsius',
+                windUnit: localStorage.getItem('windUnit') || 'ms',
+                iconStyle: localStorage.getItem('iconStyle') || 'emoji',
+                autoLocation: localStorage.getItem('autoLocation') === 'true'
+            };
+
+            const WEATHER_CODES = {
+                0: { emoji: "☀️", material: "wb_sunny", text: "Trời quang, mây tạnh", color: ["#4FC3F7", "#00BCD4"] },
+                1: { emoji: "🌤️", material: "partly_cloudy_day", text: "Trời quang, chủ yếu nắng", color: ["#64B5F6", "#81C784"] },
+                2: { emoji: "⛅️", material: "cloudy", text: "Trời quang, mây rải rác", color: ["#A5D6A7", "#90A4AE"] },
+                3: { emoji: "☁️", material: "cloudy", text: "Trời nhiều mây", color: ["#B0BEC5", "#78909C"] },
+                45: { emoji: "🌫️", material: "foggy", text: "Sương mù", color: ["#ECEFF1", "#CFD8DC"] },
+                48: { emoji: "🌫️", material: "foggy", text: "Sương mù đóng băng", color: ["#B0BEC5", "#90A4AE"] },
+                51: { emoji: "🌧️", material: "rainy", text: "Mưa phùn nhẹ", color: ["#90CAF9", "#42A5F5"] },
+                53: { emoji: "🌧️", material: "rainy", text: "Mưa phùn vừa", color: ["#64B5F6", "#2196F3"] },
+                55: { emoji: "🌧️", material: "rainy", text: "Mưa phùn nặng", color: ["#42A5F5", "#1E88E5"] },
+                56: { emoji: "🌨️", material: "snowing", text: "Mưa tuyết nhẹ đóng băng", color: ["#E1F5FE", "#B3E5FC"] },
+                57: { emoji: "🌨️", material: "snowing", text: "Mưa tuyết vừa đóng băng", color: ["#B3E5FC", "#81D4FA"] },
+                61: { emoji: "💧", material: "rainy", text: "Mưa nhẹ", color: ["#90CAF9", "#42A5F5"] },
+                63: { emoji: "💧", material: "rainy", text: "Mưa vừa", color: ["#64B5F6", "#2196F3"] },
+                65: { emoji: "💧", material: "rainy", text: "Mưa nặng hạt", color: ["#42A5F5", "#1E88E5"] },
+                66: { emoji: "🌨️", material: "snowing", text: "Mưa nhẹ đóng băng", color: ["#E1F5FE", "#B3E5FC"] },
+                67: { emoji: "🌨️", material: "snowing", text: "Mưa vừa đóng băng", color: ["#B3E5FC", "#81D4FA"] },
+                71: { emoji: "❄️", material: "ac_unit", text: "Tuyết rơi nhẹ", color: ["#E1F5FE", "#B3E5FC"] },
+                73: { emoji: "❄️", material: "ac_unit", text: "Tuyết rơi vừa", color: ["#B3E5FC", "#81D4FA"] },
+                75: { emoji: "❄️", material: "ac_unit", text: "Tuyết rơi nặng", color: ["#81D4FA", "#4FC3F7"] },
+                77: { emoji: "🌨️", material: "snowing", text: "Hạt tuyết rơi", color: ["#B3E5FC", "#81D4FA"] },
+                80: { emoji: "⛈️", material: "thunderstorm", text: "Mưa rào nhẹ", color: ["#8D6E63", "#6D4C41"] },
+                81: { emoji: "⛈️", material: "thunderstorm", text: "Mưa rào vừa", color: ["#6D4C41", "#5D4037"] },
+                82: { emoji: "⛈️", material: "thunderstorm", text: "Mưa rào dữ dội", color: ["#5D4037", "#4E342E"] },
+                85: { emoji: "🌨️", material: "snowing", text: "Mưa tuyết nhẹ", color: ["#E1F5FE", "#B3E5FC"] },
+                86: { emoji: "🌨️", material: "snowing", text: "Mưa tuyết vừa", color: ["#B3E5FC", "#81D4FA"] },
+                95: { emoji: "⚡️", material: "thunderstorm", text: "Dông bão", color: ["#6D4C41", "#5D4037"] },
+                96: { emoji: "⚡️", material: "thunderstorm", text: "Dông bão có mưa đá nhẹ", color: ["#5D4037", "#4E342E"] },
+                99: { emoji: "⚡️", material: "thunderstorm", text: "Dông bão có mưa đá nặng", color: ["#4E342E", "#3E2723"] },
+            };
+
+            const DETAIL_ICONS = {
+                humidity: { emoji: "💧", material: "humidity_mid" },
+                wind: { emoji: "💨", material: "air" },
+                wind_direction: { emoji: "➡️", material: "explore" },
+                uv: { emoji: "☀️", material: "wb_sunny" }
+            };
+            
+            document.querySelector(`input[name="temp-unit"][value="${settings.tempUnit}"]`).checked = true;
+            document.querySelector(`input[name="wind-unit"][value="${settings.windUnit}"]`).checked = true;
+            document.querySelector(`input[name="icon-style"][value="${settings.iconStyle}"]`).checked = true;
+            autoLocationToggle.checked = settings.autoLocation;
+
+            const displayMessage = (message, isError = false) => {
+                weatherInfoDiv.innerHTML = `
+                    <div class="text-center font-semibold text-lg ${isError ? 'text-red-400' : 'text-white'}">
+                        ${message}
+                    </div>
+                `;
+                weatherInfoDiv.classList.remove('hidden');
+                document.getElementById('forecast-section')?.remove();
+            };
+
+            const setWeatherBackground = (weatherCode) => {
+                const colors = WEATHER_CODES[weatherCode]?.color || ["#1A202C", "#2D3748"];
+                weatherBg.style.background = `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
+            };
+
+            const getDetailIcon = (key) => {
+                const icon = DETAIL_ICONS[key];
+                if (settings.iconStyle === 'material') {
+                    return `<span class="material-symbols-outlined text-3xl">${icon.material}</span>`;
+                }
+                return `<span class="text-3xl">${icon.emoji}</span>`;
+            }
+
+            const displayWeather = (currentData, dailyData, city, uvIndex) => {
+                const tempInCelsius = currentData.temperature_2m;
+                let displayTemp = tempInCelsius.toFixed(1);
+                let tempUnitText = '°C';
+                
+                if (settings.tempUnit === 'fahrenheit') {
+                    displayTemp = ((tempInCelsius * 9/5) + 32).toFixed(1);
+                    tempUnitText = '°F';
+                }
+
+                let displayWindSpeed = currentData.wind_speed_10m;
+                let windUnitText = 'km/h';
+                if (settings.windUnit === 'ms') {
+                    displayWindSpeed = (displayWindSpeed / 3.6).toFixed(1);
+                    windUnitText = 'm/s';
+                }
+
+                const humidity = currentData.relative_humidity_2m;
+                const weatherCode = currentData.weather_code;
+                
+                let icon = WEATHER_CODES[weatherCode]?.emoji || "❓";
+                if (settings.iconStyle === 'material') {
+                    icon = `<span class="material-symbols-outlined text-6xl">${WEATHER_CODES[weatherCode]?.material || "help"}</span>`;
+                } else {
+                    icon = `<span class="text-6xl">${icon}</span>`;
+                }
+
+                setWeatherBackground(weatherCode);
+
+                const weatherHtml = `
+                    <h2 class="capitalize">${city}</h2>
+                    <div class="temp flex justify-center items-center">
+                        ${icon}
+                        <span>${displayTemp}${tempUnitText}</span>
+                    </div>
+                    <div class="weather-details">
+                        <div class="flex items-center gap-2">
+                            ${getDetailIcon('humidity')}
+                            <span>Độ ẩm: <br/>${humidity}%</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${getDetailIcon('wind')}
+                            <span>Gió: <br/>${displayWindSpeed} ${windUnitText}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${getDetailIcon('wind_direction')}
+                            <span>Hướng gió: <br/>${currentData.wind_direction_10m}°</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${getDetailIcon('uv')}
+                            <span>Chỉ số UV: <br/>${uvIndex !== undefined ? uvIndex : 'N/A'}</span>
+                        </div>
+                    </div>
+                `;
+                weatherInfoDiv.innerHTML = weatherHtml;
+                weatherInfoDiv.classList.remove('hidden');
+
+                const forecastSection = document.getElementById('forecast-section') || document.createElement('div');
+                forecastSection.id = 'forecast-section';
+                forecastSection.className = 'forecast-section';
+                forecastSection.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-4 mt-8">Dự báo 7 ngày tới</h3>
+                    <div id="forecast-container" class="forecast-container"></div>
+                `;
+                document.querySelector('.container').appendChild(forecastSection);
+
+                const forecastContainer = document.getElementById('forecast-container');
+                forecastContainer.innerHTML = '';
+                
+                dailyData.time.forEach((day, index) => {
+                    const dailyCard = document.createElement('div');
+                    dailyCard.className = 'forecast-card';
+                    const date = new Date(day);
+                    const dayName = date.toLocaleDateString('vi-VN', { weekday: 'short' });
+                    
+                    let tempMax = dailyData.temperature_2m_max[index].toFixed(1);
+                    let tempMin = dailyData.temperature_2m_min[index].toFixed(1);
+                    if (settings.tempUnit === 'fahrenheit') {
+                        tempMax = ((dailyData.temperature_2m_max[index] * 9/5) + 32).toFixed(1);
+                        tempMin = ((dailyData.temperature_2m_min[index] * 9/5) + 32).toFixed(1);
+                    }
+                    
+                    const dailyWeatherCode = dailyData.weather_code[index];
+                    let dailyIcon = WEATHER_CODES[dailyWeatherCode]?.emoji || "❓";
+
+                    dailyCard.innerHTML = `
+                        <p class="font-bold">${dayName}</p>
+                        <div class="icon-placeholder">
+                            ${settings.iconStyle === 'material' ? `<span class="material-symbols-outlined text-4xl">${WEATHER_CODES[dailyWeatherCode]?.material || "help"}</span>` : `<span class="text-4xl">${dailyIcon}</span>`}
+                        </div>
+                        <p class="font-medium">${tempMax}${tempUnitText} / ${tempMin}${tempUnitText}</p>
+                    `;
+                    forecastContainer.appendChild(dailyCard);
+                });
+            };
+
+            const debounce = (func, delay) => {
+                let timeout;
+                return (...args) => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func(...args), delay);
+                };
+            };
+
+            const handleCityInput = debounce(async (e) => {
+                const query = e.target.value.trim();
+                if (query.length < 3) {
+                    suggestionsList.classList.add('hidden');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`, {
+                        headers: { 'User-Agent': 'WeatherApp/1.0 (https://your-website.com)' }
+                    });
+                    
+                    if (!response.ok) {
+                        suggestionsList.classList.add('hidden');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.length > 0) {
+                        suggestionsList.innerHTML = '';
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item.display_name;
+                            li.addEventListener('click', () => {
+                                cityInput.value = item.display_name;
+                                suggestionsList.classList.add('hidden');
+                                getWeather(item.lat, item.lon, item.display_name);
+                            });
+                            suggestionsList.appendChild(li);
+                        });
+                        suggestionsList.classList.remove('hidden');
+                    } else {
+                        suggestionsList.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi tìm kiếm gợi ý:", error);
+                    suggestionsList.classList.add('hidden');
+                }
+            }, 300);
+
+            const getWeather = async (lat, lon, cityName) => {
+                if (!lat || !lon) {
+                    displayMessage("Không thể lấy tọa độ thành phố.");
+                    return;
+                }
+                displayMessage("Đang tải dữ liệu thời tiết...");
+
+                try {
+                    const [weatherResponse, uvResponse] = await Promise.all([
+                        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`),
+                        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=uv_index_max&timezone=auto`)
+                    ]);
+                    
+                    if (!weatherResponse.ok) {
+                        displayMessage("Có lỗi khi lấy dữ liệu thời tiết. Vui lòng thử lại sau.", true);
+                        return;
+                    }
+
+                    const weatherData = await weatherResponse.json();
+                    const uvData = uvResponse.ok ? await uvResponse.json() : null;
+                    const uvIndex = uvData?.daily?.uv_index_max?.[0];
+
+                    displayWeather(weatherData.current, weatherData.daily, cityName, uvIndex);
+
+                } catch (error) {
+                    console.error("Lỗi:", error);
+                    displayMessage("Có lỗi xảy ra, vui lòng thử lại sau.", true);
+                }
+            };
+            
+            const getWeatherByCurrentLocation = () => {
+                if ("geolocation" in navigator) {
+                    displayMessage("Đang lấy vị trí hiện tại...");
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            // Tìm tên thành phố từ tọa độ
+                            try {
+                                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`, {
+                                    headers: { 'User-Agent': 'WeatherApp/1.0 (https://your-website.com)' }
+                                });
+                                const data = await response.json();
+                                const cityName = data.display_name || "Vị trí hiện tại";
+                                getWeather(lat, lon, cityName);
+                            } catch (error) {
+                                console.error("Lỗi khi lấy tên thành phố:", error);
+                                getWeather(lat, lon, "Vị trí hiện tại");
+                            }
+                        },
+                        (error) => {
+                            console.error("Lỗi định vị:", error.message);
+                            let errorMessage;
+                            if (error.code === error.PERMISSION_DENIED) {
+                                errorMessage = "Bạn đã từ chối cấp quyền định vị. Vui lòng bật trong cài đặt trình duyệt để sử dụng tính năng này.";
+                            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                                errorMessage = "Không thể xác định vị trí hiện tại. Vui lòng đảm bảo dịch vụ định vị đã được bật.";
+                            } else if (error.code === error.TIMEOUT) {
+                                errorMessage = "Yêu cầu lấy vị trí đã hết thời gian. Vui lòng thử lại.";
+                            } else {
+                                errorMessage = "Đã xảy ra lỗi không xác định khi lấy vị trí. Vui lòng thử lại.";
+                            }
+                            displayMessage(errorMessage, true);
+                        }
+                    );
+                } else {
+                    displayMessage("Trình duyệt không hỗ trợ tính năng định vị.", true);
+                }
+            };
+
+            // Kiểm tra và tự động hiện thời tiết nếu cài đặt được bật
+            if (settings.autoLocation) {
+                getWeatherByCurrentLocation();
+            }
+
+            searchBtn.addEventListener('click', async () => {
+                const query = cityInput.value.trim();
+                if (!query) {
+                    displayMessage("Hãy nhập tên thành phố.");
+                    return;
+                }
+                displayMessage("Đang tìm kiếm...");
+                
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`, {
+                        headers: { 'User-Agent': 'WeatherApp/1.0 (https://your-website.com)' }
+                    });
+
+                    if (!response.ok) {
+                        displayMessage(`Không tìm thấy thành phố '${query}'. Vui lòng thử lại.`, true);
+                        return;
+                    }
+
+                    const geoData = await response.json();
+                    if (geoData.length === 0) {
+                        displayMessage(`Không tìm thấy thành phố '${query}'. Vui lòng thử lại.`, true);
+                        return;
+                    }
+
+                    const lat = geoData[0].lat;
+                    const lon = geoData[0].lon;
+                    const cityName = geoData[0].display_name;
+                    getWeather(lat, lon, cityName);
+                } catch (error) {
+                    console.error("Lỗi:", error);
+                    displayMessage("Có lỗi xảy ra, vui lòng thử lại sau.", true);
+                }
+            });
+
+            cityInput.addEventListener('input', handleCityInput);
+            cityInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+            cityInput.addEventListener('focus', () => {
+                if (cityInput.value.length >= 3) {
+                    suggestionsList.classList.remove('hidden');
+                }
+            });
+            cityInput.addEventListener('blur', () => {
+                setTimeout(() => { suggestionsList.classList.add('hidden'); }, 200);
+            });
+
+            currentLocationBtn.addEventListener('click', getWeatherByCurrentLocation);
+
+            const updateSettingsUI = () toogle {
+                document.querySelector(`input[name="temp-unit"][value="${settings.tempUnit}"]`).checked = true;
+                document.querySelector(`input[name="wind-unit"][value="${settings.windUnit}"]`).checked = true;
+                document.querySelector(`input[name="icon-style"][value="${settings.iconStyle}"]`).checked = true;
+                autoLocationToggle.checked = settings.autoLocation;
+            };
+            updateSettingsUI();
+
+            document.querySelectorAll('input[name="temp-unit"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    settings.tempUnit = e.target.value;
+                    localStorage.setItem('tempUnit', settings.tempUnit);
+                    const city = cityInput.value;
+                    if (city) {
+                        searchBtn.click();
+                    }
+                });
+            });
+            document.querySelectorAll('input[name="wind-unit"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    settings.windUnit = e.target.value;
+                    localStorage.setItem('windUnit', settings.windUnit);
+                    const city = cityInput.value;
+                    if (city) {
+                        searchBtn.click();
+                    }
+                });
+            });
+            document.querySelectorAll('input[name="icon-style"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    settings.iconStyle = e.target.value;
+                    localStorage.setItem('iconStyle', settings.iconStyle);
+                    const city = cityInput.value;
+                    if (city) {
+                        searchBtn.click();
+                    }
+                });
+            });
+            
+            autoLocationToggle.addEventListener('change', (e) => {
+                settings.autoLocation = e.target.checked;
+                localStorage.setItem('autoLocation', settings.autoLocation);
+            });
+
+            settingsBtn.addEventListener('click', () => {
+                settingsPanel.classList.toggle('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
