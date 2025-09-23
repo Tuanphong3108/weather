@@ -1,0 +1,16 @@
+{
+"name": "Dự Báo Thời Tiết",
+"short_name": "Thời Tiết",
+"description": "Ứng dụng dự báo thời tiết đơn giản và đẹp mắt, có thể cài đặt trên mọi thiết bị.",
+"start_url": "index.html",
+"display": "standalone",
+"background_color": "#1a202c",
+"theme_color": "#1A92FF",
+"icons": [
+{
+"src": "icon.png",
+"sizes": "512x512",
+"type": "image/png"
+}
+]
+}
