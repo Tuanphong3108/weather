@@ -3,742 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dự Báo Thời Tiết Mobile 🌦️</title>
-    <!-- Thêm manifest.json để hỗ trợ PWA -->
-    <link rel="manifest" href="manifest.json">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <title>Weather mobile</title>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #eee;
+            text-align: center;
+        }
+        .wrapper {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in-out forwards;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
-            background-color: #1a202c;
-            overflow-x: hidden;
-            touch-action: pan-y;
-        }
-
-        #weather-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            transition: background 1s ease-in-out;
-            background: linear-gradient(135deg, #1A202C, #2D3748);
-        }
-
-        .container {
-            background-color: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            border-radius: 2rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            padding: 2rem 1.5rem;
-            text-align: center;
-            width: 100%;
-            max-width: 600px;
             position: relative;
-            z-index: 1;
+        }
+        .wrapper.fade-out {
+            animation: fadeOut 0.5s ease-in-out forwards;
+        }
+        .weather-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+        .container {
+            background-color: #2b2b2b;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
+            max-width: 600px;
+            width: 100%;
+            position: relative;
         }
         h1 {
-            font-size: 2.25rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            color: #4CAF50;
+            margin-bottom: 20px;
         }
-        .search-box {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
         }
-        input {
-            width: 100%;
-            padding: 1rem 1.5rem;
+        .highlight {
+            font-weight: bold;
+            color: #FF9800;
+        }
+        .close-button {
+            padding: 10px 20px;
             border: none;
-            border-radius: 9999px;
-            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
             color: #fff;
             font-size: 1rem;
-            outline: none;
+            cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-top: 20px;
+            background-color: #007BFF;
         }
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+        .close-button:hover {
+            background-color: #0056b3;
         }
-        input:focus {
-            background-color: rgba(255, 255, 255, 0.4);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        button {
-            width: 100%;
-            background-color: #1A92FF;
-            color: #fff;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 9999px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-        }
-        button:hover {
-            background-color: #0070e2;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-        }
-        button:active {
-            transform: scale(0.95);
-        }
-        #settings-btn {
-            background-color: transparent;
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.5rem;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            line-height: 1;
-        }
-        #settings-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: rotate(30deg);
-        }
-
-        .suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            border-radius: 1rem;
-            margin-top: 0.5rem;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 10;
-        }
-        .suggestions li {
-            padding: 0.75rem 1.5rem;
-            text-align: left;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .suggestions li:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .weather-info {
-            padding: 2rem 1.5rem;
-            border-radius: 2rem;
-            background-color: rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            text-align: left;
-            transition: all 0.5s ease;
-        }
-        .weather-info h2 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            text-align: center;
-        }
-        .weather-info .temp {
-            font-size: 4rem;
-            font-weight: 800;
-            text-align: center;
-        }
-        .weather-details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            font-size: 1rem;
-        }
-        
-        .forecast-section {
-            margin-top: 2rem;
-            text-align: center;
-        }
-        .forecast-section h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-        .forecast-container {
-            display: flex;
-            justify-content: center;
-            gap: 0.75rem;
-            overflow-x: auto;
-            padding-bottom: 1rem;
-        }
-        .hourly-forecast-container {
-            display: flex;
-            gap: 0.75rem;
-            overflow-x: auto;
-            padding-bottom: 1rem;
-            justify-content: flex-start;
-        }
-        .forecast-card, .hourly-forecast-card {
-            flex: 0 0 100px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 1.5rem;
-            padding: 0.75rem;
-            text-align: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        .forecast-card:hover, .hourly-forecast-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
-        }
-
-        .forecast-card .icon-placeholder, .hourly-forecast-card .icon-placeholder {
-            width: 3.5rem;
-            height: 3.5rem;
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .hourly-forecast-card {
-            flex: 0 0 80px;
-            min-width: 80px;
-        }
-
-        .settings-panel {
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            text-align: left;
-        }
-
-        .settings-panel h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-        }
-
-        .settings-panel label {
-            display: block;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            user-select: none;
-        }
-        .location-btn {
-            background-color: #4A5568;
-        }
-        .location-btn:hover {
-            background-color: #2D3748;
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
         }
     </style>
 </head>
 <body>
-    <div id="weather-bg"></div>
+
+<div class="wrapper" id="notice-wrapper">
+    <img src="https://tuanphong3108.github.io/weather/icon.png" alt="Weather Icon" class="weather-icon">
     <div class="container">
-        <button id="settings-btn" class="absolute top-4 right-4 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">⚙️</button>
-        <h1 class="font-extrabold text-white text-3xl mb-4">Dự Báo Thời Tiết</h1>
-        <div class="search-box">
-            <input type="text" id="city-input" placeholder="Nhập tên thành phố...">
-            <button id="search-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">Tìm Kiếm</button>
-            <button id="current-location-btn" class="location-btn text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">Vị trí hiện tại</button>
-            <ul id="suggestions" class="suggestions hidden"></ul>
-        </div>
-        <div id="weather-info" class="weather-info hidden">
-            <!-- Dữ liệu thời tiết sẽ được chèn vào đây bởi JavaScript -->
-        </div>
-
-        <!-- Settings Panel -->
-        <div id="settings-panel" class="settings-panel hidden">
-            <h2 class="text-2xl font-bold mb-4">Cài Đặt</h2>
-            
-            <div class="mb-4">
-                <h3 class="text-lg font-semibold mb-2">Đơn vị nhiệt độ</h3>
-                <div class="flex gap-4">
-                    <label>
-                        <input type="radio" name="temp-unit" value="celsius" checked>
-                        Celsius (°C)
-                    </label>
-                    <label>
-                        <input type="radio" name="temp-unit" value="fahrenheit">
-                        Fahrenheit (°F)
-                    </label>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <h3 class="text-lg font-semibold mb-2">Đơn vị tốc độ gió</h3>
-                <div class="flex gap-4">
-                    <label>
-                        <input type="radio" name="wind-unit" value="ms" checked>
-                        m/s
-                    </label>
-                    <label>
-                        <input type="radio" name="wind-unit" value="kmh">
-                        km/h
-                    </label>
-                </div>
-            </div>
-
-            <div>
-                <h3 class="text-lg font-semibold mb-2">Kiểu Icon</h3>
-                <div class="flex flex-col gap-2">
-                    <label>
-                        <input type="radio" name="icon-style" value="emoji">
-                        Emoji
-                    </label>
-                    <label>
-                        <input type="radio" name="icon-style" value="material">
-                        Material 3
-                    </label>
-                    <label>
-                        <input type="radio" name="icon-style" value="pixel" checked>
-                        Google Pixel Weather
-                    </label>
-                </div>
-            </div>
-
-            <div class="mt-4 pt-4 border-t border-gray-600">
-                <h3 class="text-lg font-semibold mb-2">Vị trí</h3>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" id="auto-location-toggle">
-                    Tự động hiện thời tiết ở vị trí hiện tại
-                </label>
-            </div>
-        </div>
+        <h1>Thông báo</h1>
+        <p>Hiện tại <span class="highlight">Weather</span> chỉ khả dụng trên trình duyệt dành cho <span class="highlight">Windows, MacOS, Linux, ChromeOS,... (Máy tính)</span></p>
+        <button class="close-button" id="close-button">Đóng</button>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cityInput = document.getElementById('city-input');
-            const searchBtn = document.getElementById('search-btn');
-            const weatherInfoDiv = document.getElementById('weather-info');
-            const suggestionsList = document.getElementById('suggestions');
-            const weatherBg = document.getElementById('weather-bg');
-            const settingsBtn = document.getElementById('settings-btn');
-            const settingsPanel = document.getElementById('settings-panel');
-            const currentLocationBtn = document.getElementById('current-location-btn');
-            const autoLocationToggle = document.getElementById('auto-location-toggle');
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const wrapper = document.getElementById('notice-wrapper');
+        const closeButton = document.getElementById('close-button');
 
-            let lastFetchedCity = null;
-            let lastFetchedCoords = null;
-
-            // Sử dụng localStorage để ghi nhớ cài đặt
-            const settings = {
-                tempUnit: localStorage.getItem('tempUnit') || 'celsius',
-                windUnit: localStorage.getItem('windUnit') || 'ms',
-                iconStyle: localStorage.getItem('iconStyle') || 'pixel', 
-                autoLocation: localStorage.getItem('autoLocation') === 'true'
-            };
-
-            const WEATHER_CODES = {
-                0: { emoji: "☀️", material: "wb_sunny", night_emoji: "🌙", night_material: "nightlight_round", text: "Trời quang, mây tạnh", color: ["#4FC3F7", "#00BCD4"] },
-                1: { emoji: "🌤️", material: "partly_cloudy_day", night_emoji: "☁️", night_material: "partly_cloudy_night", text: "Trời quang, chủ yếu nắng", color: ["#64B5F6", "#81C784"] },
-                2: { emoji: "⛅️", material: "cloudy", text: "Trời quang, mây rải rác", color: ["#A5D6A7", "#90A4AE"] },
-                3: { emoji: "☁️", material: "cloudy", text: "Trời nhiều mây", color: ["#B0BEC5", "#78909C"] },
-                45: { emoji: "🌫️", material: "foggy", text: "Sương mù", color: ["#ECEFF1", "#CFD8DC"] },
-                48: { emoji: "🌫️", material: "foggy", text: "Sương mù đóng băng", color: ["#B0BEC5", "#90A4AE"] },
-                51: { emoji: "🌧️", material: "rainy", text: "Mưa phùn nhẹ", color: ["#90CAF9", "#42A5F5"] },
-                53: { emoji: "🌧️", material: "rainy", text: "Mưa phùn vừa", color: ["#64B5F6", "#2196F3"] },
-                55: { emoji: "🌧️", material: "rainy", text: "Mưa phùn nặng", color: ["#42A5F5", "#1E88E5"] },
-                56: { emoji: "🌨️", material: "snowing", text: "Mưa tuyết nhẹ đóng băng", color: ["#E1F5FE", "#B3E5FC"] },
-                57: { emoji: "🌨️", material: "snowing", text: "Mưa tuyết vừa đóng băng", color: ["#B3E5FC", "#81D4FA"] },
-                61: { emoji: "💧", material: "rainy", text: "Mưa nhẹ", color: ["#90CAF9", "#42A5F5"] },
-                63: { emoji: "💧", material: "rainy", text: "Mưa vừa", color: ["#64B5F6", "#2196F3"] },
-                65: { emoji: "💧", material: "rainy", text: "Mưa nặng hạt", color: ["#42A5F5", "#1E88E5"] },
-                66: { emoji: "🌨️", material: "snowing", text: "Mưa nhẹ đóng băng", color: ["#E1F5FE", "#B3E5FC"] },
-                67: { emoji: "🌨️", material: "snowing", text: "Mưa vừa đóng băng", color: ["#B3E5FC", "#81D4FA"] },
-                71: { emoji: "❄️", material: "ac_unit", text: "Tuyết rơi nhẹ", color: ["#E1F5FE", "#B3E5FC"] },
-                73: { emoji: "❄️", material: "ac_unit", text: "Tuyết rơi vừa", color: ["#B3E5FC", "#81D4FA"] },
-                75: { emoji: "❄️", material: "ac_unit", text: "Tuyết rơi nặng", color: ["#81D4FA", "#4FC3F7"] },
-                77: { emoji: "🌨️", material: "snowing", text: "Hạt tuyết rơi", color: ["#B3E5FC", "#81D4FA"] },
-                80: { emoji: "⛈️", material: "thunderstorm", text: "Mưa rào nhẹ", color: ["#8D6E63", "#6D4C41"] },
-                81: { emoji: "⛈️", material: "thunderstorm", text: "Mưa rào vừa", color: ["#6D4C41", "#5D4037"] },
-                82: { emoji: "⛈️", material: "thunderstorm", text: "Mưa rào dữ dội", color: ["#5D4037", "#4E342E"] },
-                85: { emoji: "🌨️", material: "snowing", text: "Mưa tuyết nhẹ", color: ["#E1F5FE", "#B3E5FC"] },
-                86: { emoji: "🌨️", material: "snowing", text: "Mưa tuyết vừa", color: ["#B3E5FC", "#81D4FA"] },
-                95: { emoji: "⚡️", material: "thunderstorm", text: "Dông bão", color: ["#6D4C41", "#5D4037"] },
-                96: { emoji: "⚡️", material: "thunderstorm", text: "Dông bão có mưa đá nhẹ", color: ["#5D4037", "#4E342E"] },
-                99: { emoji: "⚡️", material: "thunderstorm", text: "Dông bão có mưa đá nặng", color: ["#4E342E", "#3E2723"] },
-            };
-            
-            // Link trực tiếp tới repo GitHub cho icon Pixel
-            const PIXEL_BASE_URL = 'https://tuanphong3108.github.io/weather/'; // Đã đổi link theo yêu cầu của bro
-            const PIXEL_ICONS = {
-                '0': { day: 'clear_day.png', night: 'clear_night.png' },
-                '1': { day: 'mostly_clear_day.png', night: 'mostly_clear_night.png' },
-                '2': { day: 'partly_cloudy_day.png', night: 'partly_cloudy_night.png' },
-                '3': { day: 'cloudy.png', night: 'cloudy.png' },
-                '45': { day: 'haze_fog_dust_smoke.png', night: 'haze_fog_dust_smoke.png' },
-                '48': { day: 'haze_fog_dust_smoke.png', night: 'haze_fog_dust_smoke.png' },
-                '51': { day: 'drizzle.png', night: 'drizzle.png' },
-                '53': { day: 'drizzle.png', night: 'drizzle.png' },
-                '55': { day: 'drizzle.png', night: 'drizzle.png' },
-                '56': { day: 'sleet_hail.png', night: 'sleet_hail.png' },
-                '57': { day: 'sleet_hail.png', night: 'sleet_hail.png' },
-                '61': { day: 'showers_rain.png', night: 'showers_rain.png' },
-                '63': { day: 'showers_rain.png', night: 'showers_rain.png' },
-                '65': { day: 'heavy_rain.png', night: 'heavy_rain.png' }, // Changed to heavy_rain based on weather code
-                '66': { day: 'mixed_rain_hail_sleet.png', night: 'mixed_rain_hail_sleet.png' },
-                '67': { day: 'mixed_rain_hail_sleet.png', night: 'mixed_rain_hail_sleet.png' },
-                '71': { day: 'showers_snow.png', night: 'showers_snow.png' },
-                '73': { day: 'showers_snow.png', night: 'showers_snow.png' },
-                '75': { day: 'heavy_snow.png', night: 'heavy_snow.png' }, // Changed to heavy_snow
-                '77': { day: 'flurries.png', night: 'flurries.png' },
-                '80': { day: 'scattered_showers_day.png', night: 'scattered_showers_night.png' },
-                '81': { day: 'showers_rain.png', night: 'showers_rain.png' },
-                '82': { day: 'heavy_rain.png', night: 'heavy_rain.png' },
-                '85': { day: 'scattered_snow_showers_day.png', night: 'scattered_snow_showers_night.png' },
-                '86': { day: 'showers_snow.png', night: 'showers_snow.png' },
-                '95': { day: 'isolated_thunderstorms.png', night: 'isolated_thunderstorms.png' },
-                '96': { day: 'isolated_scattered_thunderstorms_day.png', night: 'isolated_scattered_thunderstorms_night.png' },
-                '99': { day: 'strong_thunderstorms.png', night: 'strong_thunderstorms.png' },
-            };
-
-            const DETAIL_ICONS = {
-                humidity: { emoji: "💧", material: "humidity_mid" },
-                wind: { emoji: "💨", material: "air" },
-                uv: { emoji: "☀️", material: "wb_sunny" },
-                visibility: { emoji: "👀", material: "visibility" }
-            };
-            
-            document.querySelector(`input[name="temp-unit"][value="${settings.tempUnit}"]`).checked = true;
-            document.querySelector(`input[name="wind-unit"][value="${settings.windUnit}"]`).checked = true;
-            document.querySelector(`input[name="icon-style"][value="${settings.iconStyle}"]`).checked = true;
-            autoLocationToggle.checked = settings.autoLocation;
-
-            const displayMessage = (message, isError = false) => {
-                weatherInfoDiv.innerHTML = `
-                    <div class="text-center font-semibold text-lg ${isError ? 'text-red-400' : 'text-white'}">
-                        ${message}
-                    </div>
-                `;
-                weatherInfoDiv.classList.remove('hidden');
-                document.getElementById('forecast-section')?.remove();
-                document.getElementById('hourly-forecast-section')?.remove();
-            };
-
-            const setWeatherBackground = (weatherCode) => {
-                const colors = WEATHER_CODES[weatherCode]?.color || ["#1A202C", "#2D3748"];
-                weatherBg.style.background = `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
-            };
-
-            const getIconHtml = (weatherCode, isNight, iconStyle, sizeClass = 'text-6xl') => {
-                const weatherCodeInfo = WEATHER_CODES[weatherCode];
-                if (iconStyle === 'material') {
-                    const materialIcon = isNight && weatherCodeInfo?.night_material ? weatherCodeInfo.night_material : weatherCodeInfo?.material;
-                    return `<span class="material-symbols-outlined ${sizeClass}">${materialIcon || "help"}</span>`;
-                } else if (iconStyle === 'pixel') {
-                    const iconFile = PIXEL_ICONS[weatherCode]?.[isNight ? 'night' : 'day'];
-                    const iconUrl = `${PIXEL_BASE_URL}${iconFile || 'clear_day.png'}`;
-                    return `<img src="${iconUrl}" alt="weather icon" class="w-16 h-16"/>`;
-                } else {
-                    const emojiIcon = isNight && weatherCodeInfo?.night_emoji ? weatherCodeInfo.night_emoji : weatherCodeInfo?.emoji;
-                    return `<span class="${sizeClass}">${emojiIcon || "❓"}</span>`;
-                }
-            };
-
-            const getDetailIcon = (key) => {
-                const icon = DETAIL_ICONS[key];
-                if (settings.iconStyle === 'emoji') {
-                    return `<span class="text-3xl">${icon.emoji}</span>`;
-                }
-                return `<span class="material-symbols-outlined text-3xl">${icon.material}</span>`;
-            };
-            
-            // Hàm chuyển đổi nhiệt độ
-            const convertTemp = (temp, unit) => {
-                if (unit === 'fahrenheit') {
-                    return ((temp * 9/5) + 32).toFixed(1);
-                }
-                return temp.toFixed(1);
-            };
-
-            const displayWeather = (currentData, dailyData, hourlyData, city, uvIndex, timezone, lat, lon) => {
-                lastFetchedCity = city;
-                lastFetchedCoords = { lat, lon };
-
-                const tempInCelsius = currentData.temperature_2m;
-                const displayTemp = convertTemp(tempInCelsius, settings.tempUnit);
-                const tempUnitText = settings.tempUnit === 'celsius' ? '°C' : '°F';
-                
-                let displayWindSpeed = currentData.wind_speed_10m;
-                let windUnitText = 'km/h';
-                if (settings.windUnit === 'ms') {
-                    displayWindSpeed = (displayWindSpeed / 3.6).toFixed(1);
-                    windUnitText = 'm/s';
-                }
-                
-                const visibilityInKm = (currentData.visibility / 1000).toFixed(1);
-                const humidity = currentData.relative_humidity_2m;
-                const weatherCode = currentData.weather_code;
-
-                const localTime = new Date().toLocaleTimeString('en-US', { timeZone: timezone, hour12: false });
-                const localHour = parseInt(localTime.split(':')[0], 10);
-                const isNight = localHour >= 18 || localHour < 6;
-                
-                const iconHtml = getIconHtml(weatherCode, isNight, settings.iconStyle);
-
-                setWeatherBackground(weatherCode);
-
-                const weatherHtml = `
-                    <h2 class="capitalize">${city}</h2>
-                    <div class="temp flex justify-center items-center">
-                        ${iconHtml}
-                        <span>${displayTemp}${tempUnitText}</span>
-                    </div>
-                    <div class="weather-details">
-                        <div class="flex items-center gap-2">
-                            ${getDetailIcon('humidity')}
-                            <span>Độ ẩm: <br/>${humidity}%</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            ${getDetailIcon('wind')}
-                            <span>Gió: <br/>${displayWindSpeed} ${windUnitText}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            ${getDetailIcon('uv')}
-                            <span>UV: <br/>${uvIndex}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            ${getDetailIcon('visibility')}
-                            <span>Tầm nhìn: <br/>${visibilityInKm} km</span>
-                        </div>
-                    </div>
-                `;
-                weatherInfoDiv.innerHTML = weatherHtml;
-                weatherInfoDiv.classList.remove('hidden');
-
-                const forecastSection = document.getElementById('forecast-section') || document.createElement('div');
-                forecastSection.id = 'forecast-section';
-                forecastSection.className = 'forecast-section';
-                // Thay đổi tiêu đề từ 7 ngày thành 6 ngày
-                forecastSection.innerHTML = `<h3>Dự báo 6 ngày tới</h3><div class="forecast-container"></div>`;
-                weatherInfoDiv.after(forecastSection);
-
-                const forecastContainer = forecastSection.querySelector('.forecast-container');
-                forecastContainer.innerHTML = '';
-                
-                // Bắt đầu vòng lặp từ i = 1 để bỏ qua ngày hiện tại
-                for (let i = 1; i < 7; i++) {
-                    const date = new Date(dailyData.time[i]);
-                    const day = date.toLocaleDateString('vi-VN', { weekday: 'short' });
-                    const dailyCode = dailyData.weather_code[i];
-                    const minTemp = convertTemp(dailyData.temperature_2m_min[i], settings.tempUnit);
-                    const maxTemp = convertTemp(dailyData.temperature_2m_max[i], settings.tempUnit);
-                    
-                    const dailyIconHtml = getIconHtml(dailyCode, false, settings.iconStyle, 'text-4xl');
-                    
-                    const card = `
-                        <div class="forecast-card">
-                            <h4 class="font-bold">${day}</h4>
-                            <div class="icon-placeholder">${dailyIconHtml}</div>
-                            <p class="font-semibold text-lg">${maxTemp}°/${minTemp}°</p>
-                        </div>
-                    `;
-                    forecastContainer.innerHTML += card;
-                }
-                
-                const hourlyForecastSection = document.getElementById('hourly-forecast-section') || document.createElement('div');
-                hourlyForecastSection.id = 'hourly-forecast-section';
-                hourlyForecastSection.className = 'forecast-section';
-                hourlyForecastSection.innerHTML = `<h3>Dự báo hàng giờ</h3><div class="hourly-forecast-container"></div>`;
-                forecastSection.after(hourlyForecastSection);
-                
-                const hourlyContainer = hourlyForecastSection.querySelector('.hourly-forecast-container');
-                hourlyContainer.innerHTML = '';
-
-                const now = new Date();
-                const currentHour = now.getHours();
-                const tempUnitTextHourly = settings.tempUnit === 'celsius' ? '°C' : '°F';
-
-
-                for (let i = 0; i < 24; i++) {
-                    const time = new Date(hourlyData.time[i]);
-                    const hour = time.getHours();
-                    const hourlyTemp = convertTemp(hourlyData.temperature_2m[i], settings.tempUnit);
-                    const hourlyCode = hourlyData.weather_code[i];
-                    
-                    const isHourlyNight = hour >= 18 || hour < 6;
-                    const hourlyIconHtml = getIconHtml(hourlyCode, isHourlyNight, settings.iconStyle, 'text-3xl');
-                    
-                    const card = `
-                        <div class="hourly-forecast-card">
-                            <!-- Luôn hiển thị giờ, bỏ "Hiện tại" -->
-                            <h4 class="font-bold">${hour}h</h4>
-                            <div class="icon-placeholder">${hourlyIconHtml}</div>
-                            <p class="font-semibold">${hourlyTemp}${tempUnitTextHourly}</p>
-                        </div>
-                    `;
-                    hourlyContainer.innerHTML += card;
-                }
-            };
-            
-            const fetchWeather = async (lat, lon, city) => {
-                displayMessage("Đang tải dữ liệu...", false);
-                try {
-                    const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=vi&format=json`);
-                    if (!geoResponse.ok) {
-                        throw new Error('Lỗi tìm kiếm thành phố');
-                    }
-                    const geoData = await geoResponse.json();
-                    if (!geoData.results || geoData.results.length === 0) {
-                        throw new Error('Không tìm thấy thành phố này. Vui lòng thử lại!');
-                    }
-                    const { latitude, longitude, name, country } = geoData.results[0];
-                    const fullCityName = `${name}, ${country}`;
-
-                    const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,visibility&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto`);
-                    if (!weatherResponse.ok) {
-                        throw new Error('Lỗi khi lấy dữ liệu thời tiết');
-                    }
-                    const weatherData = await weatherResponse.json();
-
-                    displayWeather(weatherData.current, weatherData.daily, weatherData.hourly, fullCityName, weatherData.daily.uv_index_max[0], weatherData.timezone, latitude, longitude);
-
-                } catch (error) {
-                    console.error("Lỗi:", error);
-                    displayMessage(`Lỗi: ${error.message}`, true);
-                }
-            };
-
-            const fetchWeatherByCoords = async (lat, lon) => {
-                displayMessage("Đang tìm vị trí và lấy dữ liệu...", false);
-                try {
-                    const geoResponse = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`);
-                    if (!geoResponse.ok) {
-                        throw new Error('Không thể tìm thấy vị trí của bạn.');
-                    }
-                    const geoData = await geoResponse.json();
-                    const cityName = geoData.city || geoData.principalSubdivision || "Vị trí hiện tại";
-
-                    const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,visibility&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto`);
-                    if (!weatherResponse.ok) {
-                        throw new Error('Lỗi khi lấy dữ liệu thời tiết');
-                    }
-                    const weatherData = await weatherResponse.json();
-                    
-                    displayWeather(weatherData.current, weatherData.daily, weatherData.hourly, cityName, weatherData.daily.uv_index_max[0], weatherData.timezone, lat, lon);
-                } catch (error) {
-                    console.error("Lỗi:", error);
-                    displayMessage(`Lỗi: ${error.message}`, true);
-                }
-            };
-            
-            searchBtn.addEventListener('click', () => {
-                const city = cityInput.value.trim();
-                if (city) {
-                    fetchWeather(null, null, city);
-                }
-            });
-
-            cityInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    searchBtn.click();
-                }
-            });
-
-            cityInput.addEventListener('input', async () => {
-                const query = cityInput.value.trim();
-                if (query.length < 3) {
-                    suggestionsList.classList.add('hidden');
-                    return;
-                }
-                try {
-                    const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=vi&format=json`);
-                    const data = await response.json();
-                    suggestionsList.innerHTML = '';
-                    if (data.results) {
-                        suggestionsList.classList.remove('hidden');
-                        data.results.forEach(result => {
-                            const li = document.createElement('li');
-                            li.textContent = `${result.name}, ${result.country}`;
-                            li.addEventListener('click', () => {
-                                cityInput.value = li.textContent;
-                                suggestionsList.classList.add('hidden');
-                                fetchWeather(result.latitude, result.longitude, result.name);
-                            });
-                            suggestionsList.appendChild(li);
-                        });
-                    } else {
-                        suggestionsList.classList.add('hidden');
-                    }
-                } catch (error) {
-                    suggestionsList.classList.add('hidden');
-                }
-            });
-
-            currentLocationBtn.addEventListener('click', () => {
-                if ("geolocation" in navigator) {
-                    displayMessage("Đang lấy vị trí hiện tại của bạn...", false);
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const lat = position.coords.latitude;
-                            const lon = position.coords.longitude;
-                            fetchWeatherByCoords(lat, lon);
-                        },
-                        (error) => {
-                            console.error("Lỗi:", error);
-                            displayMessage("Không thể lấy vị trí. Vui lòng cho phép quyền truy cập.", true);
-                        }
-                    );
-                } else {
-                    displayMessage("Trình duyệt của bạn không hỗ trợ Geolocation.", true);
-                }
-            });
-
-            settingsBtn.addEventListener('click', () => {
-                settingsPanel.classList.toggle('hidden');
-            });
-
-            settingsPanel.addEventListener('change', (e) => {
-                if (e.target.name === 'temp-unit') {
-                    settings.tempUnit = e.target.value;
-                    localStorage.setItem('tempUnit', e.target.value);
-                } else if (e.target.name === 'wind-unit') {
-                    settings.windUnit = e.target.value;
-                    localStorage.setItem('windUnit', e.target.value);
-                } else if (e.target.name === 'icon-style') {
-                    settings.iconStyle = e.target.value;
-                    localStorage.setItem('iconStyle', e.target.value);
-                } else if (e.target.id === 'auto-location-toggle') {
-                    settings.autoLocation = e.target.checked;
-                    localStorage.setItem('autoLocation', e.target.checked);
-                    if (settings.autoLocation) {
-                        currentLocationBtn.click();
-                    }
-                }
-
-                if (lastFetchedCoords) {
-                    fetchWeatherByCoords(lastFetchedCoords.lat, lastFetchedCoords.lon);
-                } else if (lastFetchedCity) {
-                    fetchWeather(null, null, lastFetchedCity);
-                }
-            });
-
-            if (settings.autoLocation) {
-                currentLocationBtn.click();
-            }
+        // Xử lý sự kiện khi click nút "Đóng"
+        closeButton.addEventListener('click', () => {
+            wrapper.classList.add('fade-out');
+            setTimeout(() => {
+                window.close();
+            }, 500); // Thời gian fade-out khớp với CSS
         });
-    </script>
-    <script>
-        // Đăng ký Service Worker để ứng dụng hoạt động offline
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(registration => {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                }).catch(error => {
-                    console.log('Service Worker registration failed:', error);
-                });
-            });
-        }
-    </script>
+    });
+</script>
+
 </body>
 </html>
