@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather mobile</title>
+    <title>Thông báo Weather</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,6 +67,18 @@
         .close-button:hover {
             background-color: #0056b3;
         }
+        .success-message {
+            opacity: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            color: #4CAF50;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -88,16 +100,23 @@
     </div>
 </div>
 
+<div class="success-message" id="success-message">
+    <p>Thông báo đã được đóng thành công!</p>
+    <p>Vui lòng đóng tab này.</p>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const wrapper = document.getElementById('notice-wrapper');
         const closeButton = document.getElementById('close-button');
+        const successMessage = document.getElementById('success-message');
 
         // Xử lý sự kiện khi click nút "Đóng"
         closeButton.addEventListener('click', () => {
             wrapper.classList.add('fade-out');
             setTimeout(() => {
-                window.close();
+                wrapper.style.display = 'none';
+                successMessage.style.display = 'flex';
             }, 500); // Thời gian fade-out khớp với CSS
         });
     });
