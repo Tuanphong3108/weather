@@ -329,7 +329,7 @@
             const settings = {
                 tempUnit: localStorage.getItem('tempUnit') || 'celsius',
                 windUnit: localStorage.getItem('windUnit') || 'ms',
-                iconStyle: localStorage.getItem('iconStyle') || 'pixel', // Đã thay đổi mặc định thành 'pixel'
+                iconStyle: localStorage.getItem('iconStyle') || 'pixel', 
                 autoLocation: localStorage.getItem('autoLocation') === 'true'
             };
 
@@ -365,7 +365,7 @@
             };
             
             // Link trực tiếp tới repo GitHub cho icon Pixel
-            const PIXEL_BASE_URL = 'https://raw.githubusercontent.com/yusuf-d-d/OpenWeather-Icons/main/images/';
+            const PIXEL_BASE_URL = 'https://tuanphong3108.github.io/weather/'; // Đã đổi link theo yêu cầu của bro
             const PIXEL_ICONS = {
                 '0': { day: 'clear_day.png', night: 'clear_night.png' },
                 '1': { day: 'mostly_clear_day.png', night: 'mostly_clear_night.png' },
@@ -511,13 +511,15 @@
                 const forecastSection = document.getElementById('forecast-section') || document.createElement('div');
                 forecastSection.id = 'forecast-section';
                 forecastSection.className = 'forecast-section';
-                forecastSection.innerHTML = `<h3>Dự báo 7 ngày tới</h3><div class="forecast-container"></div>`;
+                // Thay đổi tiêu đề từ 7 ngày thành 6 ngày
+                forecastSection.innerHTML = `<h3>Dự báo 6 ngày tới</h3><div class="forecast-container"></div>`;
                 weatherInfoDiv.after(forecastSection);
 
                 const forecastContainer = forecastSection.querySelector('.forecast-container');
                 forecastContainer.innerHTML = '';
                 
-                for (let i = 0; i < 7; i++) {
+                // Bắt đầu vòng lặp từ i = 1 để bỏ qua ngày hiện tại
+                for (let i = 1; i < 7; i++) {
                     const date = new Date(dailyData.time[i]);
                     const day = date.toLocaleDateString('vi-VN', { weekday: 'short' });
                     const dailyCode = dailyData.weather_code[i];
@@ -559,7 +561,8 @@
                     
                     const card = `
                         <div class="hourly-forecast-card">
-                            <h4 class="font-bold">${i === 0 ? 'Hiện tại' : `${hour}h`}</h4>
+                            <!-- Luôn hiển thị giờ, bỏ "Hiện tại" -->
+                            <h4 class="font-bold">${hour}h</h4>
                             <div class="icon-placeholder">${hourlyIconHtml}</div>
                             <p class="font-semibold">${hourlyTemp}°C</p>
                         </div>
