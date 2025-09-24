@@ -235,6 +235,45 @@
         .location-btn:hover {
             background-color: #2D3748;
         }
+        /* Loading overlay */
+        #loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            gap: 1rem;
+        }
+
+        #loading-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #loading-icon {
+            width: 8rem;
+            height: 8rem;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -249,7 +288,10 @@
     </script>
     <div id="weather-bg"></div>
     <div class="container">
-        <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">⚙️</button>
+        <!-- Đã thay emoji bằng Material Icon -->
+        <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">
+            <span class="material-symbols-outlined">settings</span>
+        </button>
         <h1 class="font-extrabold text-white text-4xl mb-6">Dự Báo Thời Tiết</h1>
         <div class="search-box">
             <input type="text" id="city-input" placeholder="Nhập tên thành phố...">
@@ -319,6 +361,12 @@
                 </label>
             </div>
         </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="hidden">
+            <img id="loading-icon" alt="Loading icon" />
+            <p id="loading-text" class="text-lg font-semibold">Đang tải dữ liệu...</p>
+        </div>
     </div>
 
     <script>
@@ -332,6 +380,8 @@
             const settingsPanel = document.getElementById('settings-panel');
             const currentLocationBtn = document.getElementById('current-location-btn');
             const autoLocationToggle = document.getElementById('auto-location-toggle');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const loadingIcon = document.getElementById('loading-icon');
 
             let lastFetchedCity = null;
             let lastFetchedCoords = null;
@@ -420,7 +470,28 @@
             document.querySelector(`input[name="icon-style"][value="${settings.iconStyle}"]`).checked = true;
             autoLocationToggle.checked = settings.autoLocation;
 
+            const showLoading = () => {
+                const now = new Date();
+                const currentHour = now.getHours();
+                const isNight = currentHour >= 18 || currentHour < 6;
+                const loadingIconUrl = isNight ? `${PIXEL_BASE_URL}clear_night.png` : `${PIXEL_BASE_URL}clear_day.png`;
+                loadingIcon.src = loadingIconUrl;
+                loadingOverlay.classList.remove('hidden');
+                loadingOverlay.classList.add('visible');
+                weatherInfoDiv.classList.add('hidden');
+                document.getElementById('forecast-section')?.remove();
+                document.getElementById('hourly-forecast-section')?.remove();
+            };
+
+            const hideLoading = () => {
+                loadingOverlay.classList.remove('visible');
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                }, 300); // Tương ứng với thời gian chuyển đổi
+            };
+
             const displayMessage = (message, isError = false) => {
+                hideLoading();
                 weatherInfoDiv.innerHTML = `
                     <div class="text-center font-semibold text-lg ${isError ? 'text-red-400' : 'text-white'}">
                         ${message}
@@ -468,6 +539,7 @@
             };
 
             const displayWeather = (currentData, dailyData, hourlyData, city, uvIndex, timezone, lat, lon) => {
+                hideLoading();
                 lastFetchedCity = city;
                 lastFetchedCoords = { lat, lon };
 
@@ -588,7 +660,7 @@
             };
             
             const fetchWeather = async (lat, lon, city) => {
-                displayMessage("Đang tải dữ liệu...", false);
+                showLoading();
                 try {
                     const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=vi&format=json`);
                     if (!geoResponse.ok) {
@@ -616,7 +688,7 @@
             };
 
             const fetchWeatherByCoords = async (lat, lon) => {
-                displayMessage("Đang tìm vị trí và lấy dữ liệu...", false);
+                showLoading();
                 try {
                     const geoResponse = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`);
                     if (!geoResponse.ok) {
@@ -683,7 +755,7 @@
 
             currentLocationBtn.addEventListener('click', () => {
                 if ("geolocation" in navigator) {
-                    displayMessage("Đang lấy vị trí hiện tại của bạn...", false);
+                    showLoading();
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
                             const lat = position.coords.latitude;
