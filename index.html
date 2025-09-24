@@ -274,21 +274,36 @@
                 transform: scale(1.1);
             }
         }
+
+        .desktop-only-container {
+            display: none; /* Mặc định ẩn trên desktop */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 <body>
-    <script>
-        // Tự động chuyển hướng đến trang mobile nếu là thiết bị di động
-        const mobilePageUrl = 'https://tuanphong3108.github.io/weather/weather_mobile.html';
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-        if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|12|lg)|pluc|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(userAgent) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|lg)|al(av|ca|co)|amoi|an(d|on)|aq(on|t\-)|as(te|us)|attw|au(di|\-m|r |s )|bn(c|eg)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll)|dc\-s|de(mo|up)|di(al|go)|do(sh|sy)|ez\-(4|6)0|ga(ko|s)|ha(mo|mm)|hbro|heyv|ho(mo|ti)|hp(i|k)o|huck|huiz|i230|iac( |\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(mo|on)|leno|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(e|ui|xy)|mb(p|t)|me(rc|sm)|mi(ac|ad|ea|er|vk)|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|v)|ng(i|g)|nl(go|ps)|nr(bb|c)|nu(at|in)|nv(mo|th)|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|([1-8]|c))|pl(ay|w)|pn\-be|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|in|u\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(mo|ma)|sh(ko|oo)|si(em|sp)|smar|sh(oo|mo)|sm(a|r)t|so(up|s )|te(mp|sh)|tf(mo|ui)|tdg|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|80)|up\.(b|ly|sy)|upsi|vl(on|ow)|vm(ev|o|tf|t)|wa(sc|pk)|wg(4|5)|wk(ig|tr)|wmbi|wn|xfer|xo(l|so)|xs(dr|t)|yz|zeto|zte\-/i.test(userAgent.substr(4))) {
-            window.location.href = mobilePageUrl;
-        }
-    </script>
     <div id="weather-bg"></div>
-    <div class="container">
-        <!-- Đã thay emoji bằng Material Icon -->
+    
+    <!-- Canvas for mobile-only message -->
+    <div id="mobile-message-container" class="desktop-only-container">
+        <canvas id="mobile-canvas"></canvas>
+    </div>
+
+    <!-- Main weather app container -->
+    <div id="main-weather-container" class="container">
         <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">
             <span class="material-symbols-outlined">settings</span>
         </button>
@@ -383,6 +398,11 @@
             const loadingOverlay = document.getElementById('loading-overlay');
             const loadingIcon = document.getElementById('loading-icon');
 
+            const mainWeatherContainer = document.getElementById('main-weather-container');
+            const mobileMessageContainer = document.getElementById('mobile-message-container');
+            const mobileCanvas = document.getElementById('mobile-canvas');
+            const ctx = mobileCanvas.getContext('2d');
+
             let lastFetchedCity = null;
             let lastFetchedCoords = null;
 
@@ -465,6 +485,64 @@
                 visibility: { emoji: "👀", material: "visibility" }
             };
             
+            // Xử lý logic hiển thị canvas cho mobile
+            const isMobile = () => {
+                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|12|lg)|pluc|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(userAgent) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|lg)|al(av|ca|co)|amoi|an(d|on)|aq(on|t\-)|as(te|us)|attw|au(di|\-m|r |s )|bn(c|eg)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll)|dc\-s|de(mo|up)|di(al|go)|do(sh|sy)|ez\-(4|6)0|ga(ko|s)|ha(mo|mm)|hbro|heyv|ho(mo|ti)|hp(i|k)o|huck|huiz|i230|iac( |\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(mo|on)|leno|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(e|ui|xy)|mb(p|t)|me(rc|sm)|mi(ac|ad|ea|er|vk)|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|v)|ng(i|g)|nl(go|ps)|nr(bb|c)|nu(at|in)|nv(mo|th)|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|([1-8]|c))|pl(ay|w)|pn\-be|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|in|u\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(mo|ma)|sh(ko|oo)|si(em|sp)|smar|sh(oo|mo)|sm(a|r)t|so(up|s )|te(mp|sh)|tf(mo|ui)|tdg|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|80)|up\.(b|ly|sy)|upsi|vl(on|ow)|vm(ev|o|tf|t)|wa(sc|pk)|wg(4|5)|wk(ig|tr)|wmbi|wn|xfer|xo(l|so)|xs(dr|t)|yz|zeto|zte\-/i.test(userAgent.substr(4));
+            };
+
+            const drawCanvasMessage = () => {
+                const text = "Hiện tại Weather chỉ khả dụng trên trình duyệt dành cho Windows, MacOS, Linux, ChromeOS,... (Máy tính)";
+                mobileCanvas.width = window.innerWidth * 0.9;
+                mobileCanvas.height = window.innerHeight * 0.5;
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.fillRect(0, 0, mobileCanvas.width, mobileCanvas.height);
+                
+                ctx.font = '24px Inter, sans-serif';
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const lines = [];
+                let currentLine = '';
+                const words = text.split(' ');
+                const maxWidth = mobileCanvas.width - 40;
+
+                for (let i = 0; i < words.length; i++) {
+                    const testLine = currentLine + words[i] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && i > 0) {
+                        lines.push(currentLine.trim());
+                        currentLine = words[i] + ' ';
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                lines.push(currentLine.trim());
+
+                const lineHeight = 30;
+                let y = (mobileCanvas.height / 2) - (lines.length / 2) * lineHeight;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    ctx.fillText(lines[i], mobileCanvas.width / 2, y);
+                    y += lineHeight;
+                }
+            };
+            
+            window.addEventListener('resize', drawCanvasMessage);
+
+            if (isMobile()) {
+                mainWeatherContainer.style.display = 'none';
+                mobileMessageContainer.style.display = 'flex';
+                drawCanvasMessage();
+            } else {
+                mainWeatherContainer.style.display = 'block';
+                mobileMessageContainer.style.display = 'none';
+            }
+
+            // Đồng bộ cài đặt từ localStorage khi tải trang
             document.querySelector(`input[name="temp-unit"][value="${settings.tempUnit}"]`).checked = true;
             document.querySelector(`input[name="wind-unit"][value="${settings.windUnit}"]`).checked = true;
             document.querySelector(`input[name="icon-style"][value="${settings.iconStyle}"]`).checked = true;
@@ -594,12 +672,16 @@
                 weatherInfoDiv.innerHTML = weatherHtml;
                 weatherInfoDiv.classList.remove('hidden');
 
-                const forecastSection = document.getElementById('forecast-section') || document.createElement('div');
-                forecastSection.id = 'forecast-section';
-                forecastSection.className = 'forecast-section';
+                let forecastSection = document.getElementById('forecast-section');
+                if (!forecastSection) {
+                    forecastSection = document.createElement('div');
+                    forecastSection.id = 'forecast-section';
+                    forecastSection.className = 'forecast-section';
+                    weatherInfoDiv.after(forecastSection);
+                }
                 // Thay đổi tiêu đề từ 7 ngày thành 6 ngày
                 forecastSection.innerHTML = `<h3>Dự báo 6 ngày tới</h3><div class="forecast-container"></div>`;
-                weatherInfoDiv.after(forecastSection);
+                
 
                 const forecastContainer = forecastSection.querySelector('.forecast-container');
                 forecastContainer.innerHTML = '';
@@ -624,11 +706,14 @@
                     forecastContainer.innerHTML += card;
                 }
                 
-                const hourlyForecastSection = document.getElementById('hourly-forecast-section') || document.createElement('div');
-                hourlyForecastSection.id = 'hourly-forecast-section';
-                hourlyForecastSection.className = 'forecast-section';
+                let hourlyForecastSection = document.getElementById('hourly-forecast-section');
+                if (!hourlyForecastSection) {
+                    hourlyForecastSection = document.createElement('div');
+                    hourlyForecastSection.id = 'hourly-forecast-section';
+                    hourlyForecastSection.className = 'forecast-section';
+                    forecastSection.after(hourlyForecastSection);
+                }
                 hourlyForecastSection.innerHTML = `<h3>Dự báo hàng giờ</h3><div class="hourly-forecast-container"></div>`;
-                forecastSection.after(hourlyForecastSection);
                 
                 const hourlyContainer = hourlyForecastSection.querySelector('.hourly-forecast-container');
                 hourlyContainer.innerHTML = '';
