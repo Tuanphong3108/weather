@@ -323,10 +323,6 @@
 
     <!-- Main weather app container -->
     <div id="main-weather-container" class="container">
-        <div id="" style="display:none; background:#f87171; color:white; font-weight:bold; border-radius:1rem; padding:1em; margin-bottom:1em; text-align:center; font-size:1.1em; display:flex; align-items:center; justify-content:center;gap:0.7em;">
-    <img src="https://tuanphong3108.github.io/weather/isolated_thunderstorms.png" alt="thunderstorm" style="width:2em;height:2em;display:inline-block;vertical-align:middle;">
-    <span id="storm-alert-message">Có bão/dông sắp đến!</span>
-</div>
         <div id="current-time"></div>
         <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">
             <span class="material-symbols-outlined">settings</span>
@@ -656,37 +652,7 @@
             };
 
             const displayWeather = (currentData, dailyData, hourlyData, city, uvIndex, timezone, lat, lon) => {
-    hideLoading();
-
-    // Nếu chưa có dailyData/weather_code thì không show banner!
-    if (!dailyData || !dailyData.weather_code) {
-        document.getElementById('storm-alert').style.display = 'none';
-    } else {
-        // Phần kiểm tra bão/dông chỉ khi load thành công dữ liệu
-        const stormCodes = [95, 96, 99, 80, 81, 82];
-        let isStormComing = false;
-        let stormDesc = "";
-
-        for (let i = 0; i < Math.min(7, dailyData.weather_code.length); i++) {
-            if (stormCodes.includes(dailyData.weather_code[i])) {
-                isStormComing = true;
-                stormDesc = WEATHER_CODES[dailyData.weather_code[i]]?.text || "Có bão/dông sắp đến!";
-                break;
-            }
-        }
-
-        const stormAlertDiv = document.getElementById('storm-alert');
-        const stormAlertMsg = document.getElementById('storm-alert-message');
-        if (isStormComing) {
-            stormAlertMsg.textContent = `Cảnh báo: ${stormDesc} trong một vài ngày tới!`;
-            stormAlertDiv.style.display = 'flex';
-        } else {
-            stormAlertDiv.style.display = 'none';
-        }
-    }
-
-    // ... phần còn lại giữ nguyên ...
-};
+                hideLoading();
                 lastFetchedCity = city;
                 lastFetchedCoords = { lat, lon };
 
