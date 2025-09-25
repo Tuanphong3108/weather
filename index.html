@@ -107,6 +107,16 @@
             background-color: rgba(255, 255, 255, 0.1);
             transform: rotate(30deg);
         }
+        
+        #current-time {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
 
         .suggestions {
             position: absolute;
@@ -150,6 +160,15 @@
             font-weight: 800;
             text-align: center;
         }
+        
+        .weather-info .weather-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-top: -1.5rem;
+            margin-bottom: 1rem;
+        }
+
         .weather-details {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -304,6 +323,7 @@
 
     <!-- Main weather app container -->
     <div id="main-weather-container" class="container">
+        <div id="current-time"></div>
         <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">
             <span class="material-symbols-outlined">settings</span>
         </button>
@@ -397,6 +417,7 @@
             const autoLocationToggle = document.getElementById('auto-location-toggle');
             const loadingOverlay = document.getElementById('loading-overlay');
             const loadingIcon = document.getElementById('loading-icon');
+            const currentTimeDiv = document.getElementById('current-time');
 
             const mainWeatherContainer = document.getElementById('main-weather-container');
             const mobileMessageContainer = document.getElementById('mobile-message-container');
@@ -469,13 +490,13 @@
                 '75': { day: 'heavy_snow.png', night: 'heavy_snow.png' }, // Changed to heavy_snow
                 '77': { day: 'flurries.png', night: 'flurries.png' },
                 '80': { day: 'scattered_showers_day.png', night: 'scattered_showers_night.png' },
-                '81': { day: 'showers_rain.png', night: 'showers_rain.png' },
-                '82': { day: 'heavy_rain.png', night: 'heavy_rain.png' },
-                '85': { day: 'scattered_snow_showers_day.png', night: 'scattered_snow_showers_night.png' },
-                '86': { day: 'showers_snow.png', night: 'showers_snow.png' },
-                '95': { day: 'isolated_thunderstorms.png', night: 'isolated_thunderstorms.png' },
-                '96': { day: 'isolated_scattered_thunderstorms_day.png', night: 'isolated_scattered_thunderstorms_night.png' },
-                '99': { day: 'strong_thunderstorms.png', night: 'strong_thunderstorms.png' },
+                81: { day: 'showers_rain.png', night: 'showers_rain.png' },
+                82: { day: 'heavy_rain.png', night: 'heavy_rain.png' },
+                85: { day: 'scattered_snow_showers_day.png', night: 'scattered_snow_showers_night.png' },
+                86: { day: 'showers_snow.png', night: 'showers_snow.png' },
+                95: { day: 'isolated_thunderstorms.png', night: 'isolated_thunderstorms.png' },
+                96: { day: 'isolated_scattered_thunderstorms_day.png', night: 'isolated_scattered_thunderstorms_night.png' },
+                99: { day: 'strong_thunderstorms.png', night: 'strong_thunderstorms.png' },
             };
 
             const DETAIL_ICONS = {
@@ -483,6 +504,13 @@
                 wind: { emoji: "💨", material: "air" },
                 uv: { emoji: "☀️", material: "wb_sunny" },
                 visibility: { emoji: "👀", material: "visibility" }
+            };
+
+            const updateTime = () => {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                currentTimeDiv.textContent = `${hours}:${minutes}`;
             };
             
             // Xử lý logic hiển thị canvas cho mobile
@@ -635,6 +663,7 @@
                 const visibilityInKm = (currentData.visibility / 1000).toFixed(1);
                 const humidity = currentData.relative_humidity_2m;
                 const weatherCode = currentData.weather_code;
+                const weatherText = WEATHER_CODES[weatherCode]?.text || "Không rõ";
 
                 const localTime = new Date().toLocaleTimeString('en-US', { timeZone: timezone, hour12: false });
                 const localHour = parseInt(localTime.split(':')[0], 10);
@@ -646,6 +675,7 @@
 
                 const weatherHtml = `
                     <h2 class="capitalize">${city}</h2>
+                    <p class="weather-text">${weatherText}</p>
                     <div class="temp flex justify-center items-center">
                         ${iconHtml}
                         <span>${displayTemp}${tempUnitText}</span>
@@ -889,6 +919,10 @@
             if (settings.autoLocation) {
                 currentLocationBtn.click();
             }
+
+            // Cập nhật thời gian mỗi phút
+            updateTime();
+            setInterval(updateTime, 60000); // 60 giây
         });
     </script>
     <script>
