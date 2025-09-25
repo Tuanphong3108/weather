@@ -345,6 +345,21 @@
         <!-- Settings Panel -->
         <div id="settings-panel" class="settings-panel hidden">
             <h2 class="text-3xl font-bold mb-4">Cài Đặt</h2>
+
+                    <div class="mb-6">
+    <h3 class="text-xl font-semibold mb-2">Kiểu giờ</h3>
+    <div class="flex gap-4">
+        <label>
+            <input type="radio" name="time-format" value="24h" checked>
+            24-Hours
+        </label>
+        <label>
+            <input type="radio" name="time-format" value="12h">
+            12-Hours
+        </label>
+    </div>
+</div>
+
             
             <div class="mb-6">
                 <h3 class="text-xl font-semibold mb-2">Đơn vị nhiệt độ</h3>
@@ -401,6 +416,7 @@
             </div>
         </div>
 
+
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="hidden">
             <img id="loading-icon" alt="Loading icon" />
@@ -433,16 +449,17 @@
 
             const refreshBtn = document.getElementById('refresh-btn');
 refreshBtn.addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.reload();
 });
 
             // Sử dụng localStorage để ghi nhớ cài đặt
             const settings = {
-                tempUnit: localStorage.getItem('tempUnit') || 'celsius',
-                windUnit: localStorage.getItem('windUnit') || 'ms',
-                iconStyle: localStorage.getItem('iconStyle') || 'pixel', 
-                autoLocation: localStorage.getItem('autoLocation') === 'true'
-            };
+    tempUnit: localStorage.getItem('tempUnit') || 'celsius',
+    windUnit: localStorage.getItem('windUnit') || 'ms',
+    iconStyle: localStorage.getItem('iconStyle') || 'pixel',
+    autoLocation: localStorage.getItem('autoLocation') === 'true',
+    timeFormat: localStorage.getItem('timeFormat') || '24h'
+};
 
             const WEATHER_CODES = {
                 0: { emoji: "☀️", material: "wb_sunny", night_emoji: "🌙", night_material: "nightlight_round", text: "Trời quang, mây tạnh", color: ["#4FC3F7", "#00BCD4"] },
@@ -517,16 +534,27 @@ refreshBtn.addEventListener('click', () => {
 
             const updateTime = () => {
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    // UI ONLY: Thêm hình ảnh clear_day hoặc clear_night phía trước giờ + chữ (Theo giờ máy tính)
+    let hours = now.getHours();
+    let minutes = String(now.getMinutes()).padStart(2, '0');
+    let timeStr = "";
+
+    // Kiểm tra settings.timeFormat
+    if (settings.timeFormat === '12h') {
+        let period = hours >= 12 ? "PM" : "AM";
+        let displayHour = hours % 12;
+        if (displayHour === 0) displayHour = 12;
+        timeStr = `${displayHour}:${minutes} ${period}`;
+    } else {
+        timeStr = `${String(hours).padStart(2, '0')}:${minutes}`;
+    }
+
     let iconUrl = '';
     if (now.getHours() >= 6 && now.getHours() < 18) {
         iconUrl = 'https://tuanphong3108.github.io/weather/clear_day.png';
     } else {
         iconUrl = 'https://tuanphong3108.github.io/weather/clear_night.png';
     }
-    currentTimeDiv.innerHTML = `<img src="${iconUrl}" alt="" style="width:2em;height:2em;vertical-align:middle;margin-right:0.5em;display:inline-block;">${hours}:${minutes} <span style="font-size:0.9em;opacity:0.8;">(Theo giờ máy tính)</span>`;
+    currentTimeDiv.innerHTML = `<img src="${iconUrl}" alt="" style="width:2em;height:2em;vertical-align:middle;margin-right:0.5em;display:inline-block;">${timeStr} <span style="font-size:0.9em;opacity:0.8;">(Theo giờ máy tính)</span>`;
 };
             
             // Xử lý logic hiển thị canvas cho mobile
@@ -591,6 +619,7 @@ refreshBtn.addEventListener('click', () => {
             document.querySelector(`input[name="wind-unit"][value="${settings.windUnit}"]`).checked = true;
             document.querySelector(`input[name="icon-style"][value="${settings.iconStyle}"]`).checked = true;
             autoLocationToggle.checked = settings.autoLocation;
+            document.querySelector(`input[name="time-format"][value="${settings.timeFormat}"]`).checked = true;
 
             const showLoading = () => {
                 const now = new Date();
@@ -908,16 +937,20 @@ refreshBtn.addEventListener('click', () => {
             });
 
             settingsPanel.addEventListener('change', (e) => {
-                if (e.target.name === 'temp-unit') {
-                    settings.tempUnit = e.target.value;
-                    localStorage.setItem('tempUnit', e.target.value);
-                } else if (e.target.name === 'wind-unit') {
-                    settings.windUnit = e.target.value;
-                    localStorage.setItem('windUnit', e.target.value);
-                } else if (e.target.name === 'icon-style') {
-                    settings.iconStyle = e.target.value;
-                    localStorage.setItem('iconStyle', e.target.value);
-                } else if (e.target.id === 'auto-location-toggle') {
+    if (e.target.name === 'temp-unit') {
+        settings.tempUnit = e.target.value;
+        localStorage.setItem('tempUnit', e.target.value);
+    } else if (e.target.name === 'wind-unit') {
+        settings.windUnit = e.target.value;
+        localStorage.setItem('windUnit', e.target.value);
+    } else if (e.target.name === 'icon-style') {
+        settings.iconStyle = e.target.value;
+        localStorage.setItem('iconStyle', e.target.value);
+    } else if (e.target.name === 'time-format') {
+        settings.timeFormat = e.target.value;
+        localStorage.setItem('timeFormat', e.target.value);
+        updateTime(); // Cập nhật lại hiển thị giờ
+    } else if (e.target.id === 'auto-location-toggle') {
                     settings.autoLocation = e.target.checked;
                     localStorage.setItem('autoLocation', e.target.checked);
                     if (settings.autoLocation) {
