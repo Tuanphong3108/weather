@@ -22,10 +22,9 @@
       transition: opacity 1s ease, transform 1s ease;
     }
 
-    /* Class khi ẩn */
     .fadeOut {
       opacity: 0;
-      transform: scale(0.7); /* Thu nhỏ */
+      transform: scale(0.7);
     }
   </style>
 </head>
@@ -33,14 +32,23 @@
   <img id="splash" src="https://tuanphong3108.github.io/weather/icon.png" alt="Splash Icon" />
 
   <script>
+    // Chờ 2s rồi xin quyền vị trí
     setTimeout(() => {
-      const splash = document.getElementById("splash");
-      splash.classList.add("fadeOut");
-      // Đợi animation xong rồi chuyển trang
-      setTimeout(() => {
-        window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
-      }, 1000);
-    }, 2000); // Splash hiển thị 2s
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          // Nếu user cho phép → hiệu ứng splash rồi vào app
+          const splash = document.getElementById("splash");
+          splash.classList.add("fadeOut");
+          setTimeout(() => {
+            window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
+          }, 1000);
+        },
+        (err) => {
+          // Nếu user từ chối → chuyển sang error page
+          window.location.href = "https://tuanphong3108.github.io/weather/error_location.html";
+        }
+      );
+    }, 2000);
   </script>
 </body>
 </html>
