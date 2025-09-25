@@ -16,6 +16,7 @@
       color: #ffffff;
       font-family: Arial, sans-serif;
       text-align: center;
+      overflow: hidden;
     }
     h1 {
       font-size: 24px;
@@ -34,6 +35,7 @@
       font-weight: bold;
       display: inline-block;
       transition: background 0.3s ease;
+      cursor: pointer;
     }
     .retry {
       background: #ff4444;
@@ -49,21 +51,54 @@
     .continue:hover {
       background: #007acc;
     }
+    /* Splash ẩn mặc định */
+    #splash {
+      display: none;
+      width: 150px;
+      height: 150px;
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    .fadeOut {
+      opacity: 0;
+      transform: scale(0.7);
+    }
   </style>
 </head>
 <body>
-  <h1>🚫 Không thể lấy vị trí</h1>
-  <p>Bạn đã từ chối quyền truy cập vị trí, ứng dụng không thể hiển thị thời tiết chính xác.</p>
+  <div id="content">
+    <h1>🚫 Không thể lấy vị trí</h1>
+    <p>Bạn đã từ chối quyền truy cập vị trí, ứng dụng không thể hiển thị thời tiết chính xác.</p>
 
-  <!-- Nút mở Chrome settings -->
-  <a class="btn retry" 
-     href="chrome://settings/content/siteDetails?site=https%3A%2F%2Ftuanphong3108.github.io">
-     ⚙️ Cấp lại quyền
-  </a>
+    <!-- Nút mở Chrome settings -->
+    <a class="btn retry" target="_blank"
+       href="chrome://settings/content/siteDetails?site=https%3A%2F%2Ftuanphong3108.github.io">
+       ⚙️ Cấp lại quyền
+    </a>
 
-  <!-- Nút tiếp tục -->
-  <a class="btn continue" href="https://tuanphong3108.github.io/weather/weather_desktop.html">
-     ⏩ Tiếp tục mà không cần vị trí
-  </a>
+    <!-- Nút tiếp tục -->
+    <button class="btn continue" onclick="continueWithoutLocation()">
+      ⏩ Tiếp tục mà không cần vị trí
+    </button>
+  </div>
+
+  <!-- Splash -->
+  <img id="splash" src="https://tuanphong3108.github.io/weather/icon.png" alt="Splash Icon" />
+
+  <script>
+    function continueWithoutLocation() {
+      // Ẩn content, hiện splash
+      document.getElementById("content").style.display = "none";
+      const splash = document.getElementById("splash");
+      splash.style.display = "block";
+
+      // Sau 2s thì fadeOut và redirect
+      setTimeout(() => {
+        splash.classList.add("fadeOut");
+        setTimeout(() => {
+          window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
+        }, 1000);
+      }, 2000);
+    }
+  </script>
 </body>
 </html>
