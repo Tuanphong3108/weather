@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thời tiết - Please Wait...</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Splash Screen</title>
   <style>
     body {
       margin: 0;
@@ -11,29 +11,36 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #f4f4f4;
-      transition: opacity 1s ease-in-out;
+      background-color: #121212; /* Dark mode */
+      overflow: hidden;
     }
-    img {
-      width: 120px;
-      height: 120px;
-      animation: fadeIn 1s ease-in-out;
+
+    #splash {
+      width: 150px;
+      height: 150px;
+      opacity: 1;
+      transition: opacity 1s ease, transform 1s ease;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
+
+    /* Class khi ẩn */
+    .fadeOut {
+      opacity: 0;
+      transform: scale(0.7); /* Thu nhỏ */
     }
   </style>
-  <script>
-    setTimeout(() => {
-      document.body.style.opacity = 0;
-      setTimeout(() => {
-        window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
-      }, 1000); // đợi fade-out xong mới redirect
-    }, 2000); // hiện splash 2s
-  </script>
 </head>
 <body>
-  <img src="https://tuanphong3108.github.io/weather/icon.png" alt="Weather Icon">
+  <img id="splash" src="https://tuanphong3108.github.io/weather/icon.png" alt="Splash Icon" />
+
+  <script>
+    setTimeout(() => {
+      const splash = document.getElementById("splash");
+      splash.classList.add("fadeOut");
+      // Đợi animation xong rồi chuyển trang
+      setTimeout(() => {
+        window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
+      }, 1000);
+    }, 2000); // Splash hiển thị 2s
+  </script>
 </body>
 </html>
