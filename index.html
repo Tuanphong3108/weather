@@ -510,14 +510,14 @@
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    // UI ONLY: Thêm hình ảnh clear_day hoặc clear_night phía trước giờ
+    // UI ONLY: Thêm hình ảnh clear_day hoặc clear_night phía trước giờ + chữ (Theo giờ máy tính)
     let iconUrl = '';
     if (now.getHours() >= 6 && now.getHours() < 18) {
         iconUrl = 'https://tuanphong3108.github.io/weather/clear_day.png';
     } else {
         iconUrl = 'https://tuanphong3108.github.io/weather/clear_night.png';
     }
-    currentTimeDiv.innerHTML = `<img src="${iconUrl}" alt="" style="width:2em;height:2em;vertical-align:middle;margin-right:0.5em;display:inline-block;">${hours}:${minutes}`;
+    currentTimeDiv.innerHTML = `<img src="${iconUrl}" alt="" style="width:2em;height:2em;vertical-align:middle;margin-right:0.5em;display:inline-block;">${hours}:${minutes} <span style="font-size:0.9em;opacity:0.8;">(Theo giờ máy tính)</span>`;
 };
             
             // Xử lý logic hiển thị canvas cho mobile
