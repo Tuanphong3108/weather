@@ -1,54 +1,64 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Splash Screen</title>
   <style>
     body {
       margin: 0;
-      height: 100vh;
+      background: #121212;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #121212; /* Dark mode */
-      overflow: hidden;
+      height: 100vh;
     }
-
-    #splash {
-      width: 150px;
-      height: 150px;
-      opacity: 1;
-      transition: opacity 1s ease, transform 1s ease;
+    img {
+      width: 120px;
+      height: 120px;
+      animation: fadeout 2s forwards 1.5s;
     }
-
-    .fadeOut {
-      opacity: 0;
-      transform: scale(0.7);
+    @keyframes fadeout {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.7); }
     }
   </style>
 </head>
 <body>
-  <img id="splash" src="https://tuanphong3108.github.io/weather/icon.png" alt="Splash Icon" />
+  <img src="https://tuanphong3108.github.io/weather/icon.png" alt="Logo" />
 
   <script>
-    // Chờ 2s rồi xin quyền vị trí
-    setTimeout(() => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          // Nếu user cho phép → hiệu ứng splash rồi vào app
-          const splash = document.getElementById("splash");
-          splash.classList.add("fadeOut");
-          setTimeout(() => {
-            window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
-          }, 1000);
-        },
-        (err) => {
-          // Nếu user từ chối → chuyển sang error page
-          window.location.href = "https://tuanphong3108.github.io/weather/error_location.html";
-        }
-      );
-    }, 2000);
+    function detectMobileOS() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      if (/android/i.test(ua)) return "Android";
+      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "iOS";
+      return "Other";
+    }
+
+    window.onload = () => {
+      const os = detectMobileOS();
+
+      if (os === "Android" || os === "iOS") {
+        // 👉 Nếu là mobile OS thì chuyển thẳng đến mobile version
+        setTimeout(() => {
+          window.location.href = "https://tuanphong3108.github.io/weather/weather_mobile.html";
+        }, 2000);
+      } else {
+        // 👉 Desktop OS thì xin quyền vị trí
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            setTimeout(() => {
+              window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
+            }, 2000);
+          },
+          () => {
+            setTimeout(() => {
+              window.location.href = "https://tuanphong3108.github.io/weather/error_location.html";
+            }, 2000);
+          }
+        );
+      }
+    };
   </script>
 </body>
 </html>
