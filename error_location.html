@@ -36,6 +36,7 @@
       display: inline-block;
       transition: background 0.3s ease;
       cursor: pointer;
+      border: none;
     }
     .retry {
       background: #ff4444;
@@ -51,7 +52,6 @@
     .continue:hover {
       background: #007acc;
     }
-    /* Splash ẩn mặc định */
     #splash {
       display: none;
       width: 150px;
@@ -69,11 +69,10 @@
     <h1>🚫 Không thể lấy vị trí</h1>
     <p>Bạn đã từ chối quyền truy cập vị trí, ứng dụng không thể hiển thị thời tiết chính xác.</p>
 
-    <!-- Nút mở Chrome settings -->
-    <a class="btn retry" target="_blank"
-       href="chrome://settings/content/siteDetails?site=https%3A%2F%2Ftuanphong3108.github.io">
-       ⚙️ Cấp lại quyền
-    </a>
+    <!-- Nút copy link settings -->
+    <button class="btn retry" onclick="copySettingsLink()">
+      ⚙️ Cấp lại quyền
+    </button>
 
     <!-- Nút tiếp tục -->
     <button class="btn continue" onclick="continueWithoutLocation()">
@@ -85,6 +84,15 @@
   <img id="splash" src="https://tuanphong3108.github.io/weather/icon.png" alt="Splash Icon" />
 
   <script>
+    function copySettingsLink() {
+      const link = "chrome://settings/content/siteDetails?site=https%3A%2F%2Ftuanphong3108.github.io";
+      navigator.clipboard.writeText(link).then(() => {
+        alert("📋 Link đã được copy. Hãy dán vào thanh địa chỉ Chrome để mở cài đặt quyền.");
+      }).catch(() => {
+        alert("⚠️ Trình duyệt không cho copy tự động. Bạn hãy tự copy link sau:\n\n" + link);
+      });
+    }
+
     function continueWithoutLocation() {
       // Ẩn content, hiện splash
       document.getElementById("content").style.display = "none";
