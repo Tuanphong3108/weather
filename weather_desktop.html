@@ -799,24 +799,32 @@ refreshBtn.addEventListener('click', () => {
 
 
                 for (let i = 0; i < 24; i++) {
-                    const time = new Date(hourlyData.time[i]);
-                    const hour = time.getHours();
-                    const hourlyTemp = convertTemp(hourlyData.temperature_2m[i], settings.tempUnit);
-                    const hourlyCode = hourlyData.weather_code[i];
-                    
-                    const isHourlyNight = hour >= 18 || hour < 6;
-                    const hourlyIconHtml = getIconHtml(hourlyCode, isHourlyNight, settings.iconStyle, 'text-3xl');
-                    
-                    const card = `
-                        <div class="hourly-forecast-card">
-                            <!-- Luôn hiển thị giờ, bỏ "Hiện tại" -->
-                            <h4 class="font-bold">${hour}h</h4>
-                            <div class="icon-placeholder">${hourlyIconHtml}</div>
-                            <p class="font-semibold">${hourlyTemp}${tempUnitTextHourly}</p>
-                        </div>
-                    `;
-                    hourlyContainer.innerHTML += card;
-                }
+    const time = new Date(hourlyData.time[i]);
+    const hour = time.getHours();
+    let hourLabel = '';
+    if (settings.timeFormat === '12h') {
+        let displayHour = hour % 12;
+        if (displayHour === 0) displayHour = 12;
+        let period = hour >= 12 ? 'PM' : 'AM';
+        hourLabel = `${displayHour} ${period}`;
+    } else {
+        hourLabel = `${hour}h`;
+    }
+
+    const hourlyTemp = convertTemp(hourlyData.temperature_2m[i], settings.tempUnit);
+    const hourlyCode = hourlyData.weather_code[i];
+    const isHourlyNight = hour >= 18 || hour < 6;
+    const hourlyIconHtml = getIconHtml(hourlyCode, isHourlyNight, settings.iconStyle, 'text-3xl');
+    
+    const card = `
+        <div class="hourly-forecast-card">
+            <h4 class="font-bold">${hourLabel}</h4>
+            <div class="icon-placeholder">${hourlyIconHtml}</div>
+            <p class="font-semibold">${hourlyTemp}${tempUnitTextHourly}</p>
+        </div>
+    `;
+    hourlyContainer.innerHTML += card;
+}
             };
             
             const fetchWeather = async (lat, lon, city) => {
