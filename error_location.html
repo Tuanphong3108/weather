@@ -6,106 +6,61 @@
   <title>Lỗi quyền vị trí</title>
   <style>
     body {
-      margin: 0;
-      height: 100vh;
+      background: #121212;
+      color: #fff;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
-      background-color: #121212;
-      color: #ffffff;
+      height: 100vh;
+      margin: 0;
       font-family: Arial, sans-serif;
       text-align: center;
-      overflow: hidden;
-    }
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 16px;
-      opacity: 0.8;
     }
     .btn {
-      margin-top: 15px;
-      padding: 10px 18px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 15px;
-      font-weight: bold;
-      display: inline-block;
-      transition: background 0.3s ease;
-      cursor: pointer;
+      margin: 10px;
+      padding: 10px 20px;
+      background: #1e88e5;
       border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
     }
-    .retry {
-      background: #ff4444;
-      color: #fff;
-    }
-    .retry:hover {
-      background: #cc0000;
-    }
-    .continue {
-      background: #00bfff;
-      color: #fff;
-    }
-    .continue:hover {
-      background: #007acc;
-    }
-    #splash {
-      display: none;
-      width: 150px;
-      height: 150px;
-      transition: opacity 1s ease, transform 1s ease;
-    }
-    .fadeOut {
-      opacity: 0;
-      transform: scale(0.7);
+    .btn:hover {
+      background: #1565c0;
     }
   </style>
 </head>
 <body>
-  <div id="content">
-    <h1>🚫 Không thể lấy vị trí</h1>
-    <p>Bạn đã từ chối quyền truy cập vị trí, ứng dụng không thể hiển thị thời tiết chính xác.</p>
-
-    <!-- Nút copy link settings -->
-    <button class="btn retry" onclick="copySettingsLink()">
-      ⚙️ Cấp lại quyền
-    </button>
-
-    <!-- Nút tiếp tục -->
-    <button class="btn continue" onclick="continueWithoutLocation()">
-      ⏩ Tiếp tục mà không cần vị trí
-    </button>
-  </div>
-
-  <!-- Splash -->
-  <img id="splash" src="https://tuanphong3108.github.io/weather/icon.png" alt="Splash Icon" />
+  <h1>Không thể lấy quyền vị trí 🌍</h1>
+  <p>Ứng dụng cần quyền truy cập vị trí để hiển thị thời tiết chính xác.</p>
+  <button class="btn" onclick="retryPermission()">Cấp lại quyền</button>
+  <button class="btn" onclick="continueWithoutLocation()">Tiếp tục mà không cần vị trí</button>
 
   <script>
-    function copySettingsLink() {
-      const link = "chrome://settings/content/siteDetails?site=https%3A%2F%2Ftuanphong3108.github.io";
-      navigator.clipboard.writeText(link).then(() => {
-        alert("📋 Link đã được copy. Hãy dán vào thanh địa chỉ Chrome để mở cài đặt quyền.");
-      }).catch(() => {
-        alert("⚠️ Trình duyệt không cho copy tự động. Bạn hãy tự copy link sau:\n\n" + link);
-      });
+    // Nếu user cấp quyền ngay khi ở trang error → tự động redirect
+    async function checkPermission() {
+      try {
+        const status = await navigator.permissions.query({ name: "geolocation" });
+        if (status.state === "granted") {
+          window.location.href = "splash.html"; // splash rồi redirect tiếp
+        }
+      } catch (e) {
+        console.log("Không check được quyền:", e);
+      }
+    }
+
+    // Auto check quyền mỗi 1s
+    setInterval(checkPermission, 1000);
+
+    function retryPermission() {
+      window.open("chrome://settings/content/siteDetails?site=https%3A%2F%2Ftuanphong3108.github.io", "_blank");
     }
 
     function continueWithoutLocation() {
-      // Ẩn content, hiện splash
-      document.getElementById("content").style.display = "none";
-      const splash = document.getElementById("splash");
-      splash.style.display = "block";
-
-      // Sau 2s thì fadeOut và redirect
-      setTimeout(() => {
-        splash.classList.add("fadeOut");
-        setTimeout(() => {
-          window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
-        }, 1000);
-      }, 2000);
+      window.location.href = "splash.html"; // splash lại trước khi vào main
     }
   </script>
 </body>
