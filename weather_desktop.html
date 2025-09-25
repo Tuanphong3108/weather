@@ -657,8 +657,8 @@
 
             const displayWeather = (currentData, dailyData, hourlyData, city, uvIndex, timezone, lat, lon) => {
                 hideLoading();
-                // Kiểm tra bão/dông/thunderstorm
-const stormCodes = [95, 96, 99, 80, 81, 82]; // Mã thời tiết dông bão, giông, mưa rào
+                // Kiểm tra bão/dông/thunderstorm chỉ với vị trí đang xem
+const stormCodes = [95, 96, 99, 80, 81, 82];
 let isStormComing = false;
 let stormDesc = "";
 
@@ -674,9 +674,9 @@ const stormAlertDiv = document.getElementById('storm-alert');
 const stormAlertMsg = document.getElementById('storm-alert-message');
 if (isStormComing) {
     stormAlertMsg.textContent = `Cảnh báo: ${stormDesc} trong một vài ngày tới!`;
-    stormAlertDiv.style.display = 'block';
+    stormAlertDiv.style.display = 'flex'; // flex để có ảnh + chữ đẹp khi có cảnh báo
 } else {
-    stormAlertDiv.style.display = 'none';
+    stormAlertDiv.style.display = 'none'; // Ẩn khi không có cảnh báo
 }
                 lastFetchedCity = city;
                 lastFetchedCoords = { lat, lon };
