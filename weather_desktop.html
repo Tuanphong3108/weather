@@ -323,6 +323,10 @@
 
     <!-- Main weather app container -->
     <div id="main-weather-container" class="container">
+        <div id="storm-alert" style="display:none; background:#f87171; color:white; font-weight:bold; border-radius:1rem; padding:1em; margin-bottom:1em; text-align:center; font-size:1.1em; display:flex; align-items:center; justify-content:center;gap:0.7em;">
+    <img src="https://tuanphong3108.github.io/weather/isolated_thunderstorms.png" alt="thunderstorm" style="width:2em;height:2em;display:inline-block;vertical-align:middle;">
+    <span id="storm-alert-message">Có bão/dông sắp đến!</span>
+</div>
         <div id="current-time"></div>
         <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">
             <span class="material-symbols-outlined">settings</span>
@@ -653,6 +657,27 @@
 
             const displayWeather = (currentData, dailyData, hourlyData, city, uvIndex, timezone, lat, lon) => {
                 hideLoading();
+                // Kiểm tra bão/dông/thunderstorm
+const stormCodes = [95, 96, 99, 80, 81, 82]; // Mã thời tiết dông bão, giông, mưa rào
+let isStormComing = false;
+let stormDesc = "";
+
+for (let i = 0; i < Math.min(7, dailyData.weather_code.length); i++) {
+    if (stormCodes.includes(dailyData.weather_code[i])) {
+        isStormComing = true;
+        stormDesc = WEATHER_CODES[dailyData.weather_code[i]]?.text || "Có bão/dông sắp đến!";
+        break;
+    }
+}
+
+const stormAlertDiv = document.getElementById('storm-alert');
+const stormAlertMsg = document.getElementById('storm-alert-message');
+if (isStormComing) {
+    stormAlertMsg.textContent = `Cảnh báo: ${stormDesc} trong một vài ngày tới!`;
+    stormAlertDiv.style.display = 'block';
+} else {
+    stormAlertDiv.style.display = 'none';
+}
                 lastFetchedCity = city;
                 lastFetchedCoords = { lat, lon };
 
