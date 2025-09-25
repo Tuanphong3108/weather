@@ -507,11 +507,18 @@
             };
 
             const updateTime = () => {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                currentTimeDiv.textContent = `${hours}:${minutes}`;
-            };
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    // UI ONLY: Thêm hình ảnh clear_day hoặc clear_night phía trước giờ
+    let iconUrl = '';
+    if (now.getHours() >= 6 && now.getHours() < 18) {
+        iconUrl = 'https://tuanphong3108.github.io/weather/clear_day.png';
+    } else {
+        iconUrl = 'https://tuanphong3108.github.io/weather/clear_night.png';
+    }
+    currentTimeDiv.innerHTML = `<img src="${iconUrl}" alt="" style="width:2em;height:2em;vertical-align:middle;margin-right:0.5em;display:inline-block;">${hours}:${minutes}`;
+};
             
             // Xử lý logic hiển thị canvas cho mobile
             const isMobile = () => {
