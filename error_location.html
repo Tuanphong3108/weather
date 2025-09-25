@@ -6,24 +6,24 @@
   <title>Lỗi quyền vị trí</title>
   <style>
     body {
-      background: #121212;
-      color: #fff;
+      margin: 0;
+      height: 100vh;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
+      flex-direction: column;
+      gap: 20px;
       font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
       text-align: center;
     }
     .btn {
-      margin: 10px;
-      padding: 10px 20px;
       background: #1e88e5;
-      border: none;
-      border-radius: 8px;
       color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
       transition: 0.3s;
@@ -31,37 +31,63 @@
     .btn:hover {
       background: #1565c0;
     }
+    .link-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1f1f1f;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      width: 100%;
+      font-size: 14px;
+    }
+    input:focus {
+      outline: none;
+    }
   </style>
 </head>
 <body>
-  <h1>Không thể lấy quyền vị trí 🌍</h1>
-  <p>Ứng dụng cần quyền truy cập vị trí để hiển thị thời tiết chính xác.</p>
-  <button class="btn" onclick="retryPermission()">Cấp lại quyền</button>
+  <h1>⚠️ Không thể lấy quyền vị trí</h1>
+  <p>Để cấp lại quyền, hãy mở link sau trong Chrome:</p>
+
+  <div class="link-box">
+    <input id="permLink" value="chrome://settings/content/siteDetails?site=https%3A%2F%2Ftuanphong3108.github.io" readonly>
+    <button class="btn" onclick="copyPermissionLink()">Copy</button>
+  </div>
+
   <button class="btn" onclick="continueWithoutLocation()">Tiếp tục mà không cần vị trí</button>
 
   <script>
-    // Nếu user cấp quyền ngay khi ở trang error → tự động redirect
-    async function checkPermission() {
+    async function copyPermissionLink() {
+      const url = document.getElementById("permLink").value;
       try {
-        const status = await navigator.permissions.query({ name: "geolocation" });
-        if (status.state === "granted") {
-          window.location.href = "splash.html"; // splash rồi redirect tiếp
-        }
+        await navigator.clipboard.writeText(url);
+        alert("✅ Link đã được copy!\nHãy dán vào thanh địa chỉ của Chrome để mở.");
       } catch (e) {
-        console.log("Không check được quyền:", e);
+        alert("❌ Không copy được tự động. Vui lòng copy thủ công.");
       }
     }
 
-    // Auto check quyền mỗi 1s
-    setInterval(checkPermission, 1000);
-
-    function retryPermission() {
-      window.open("chrome://settings/content/siteDetails?site=https%3A%2F%2Ftuanphong3108.github.io", "_blank");
-    }
-
     function continueWithoutLocation() {
-      window.location.href = "splash.html"; // splash lại trước khi vào main
+      document.body.innerHTML = `
+        <img src="https://tuanphong3108.github.io/weather/icon.png" style="width:120px;height:120px;animation:fadeout 2s forwards;"/>
+      `;
+      setTimeout(() => {
+        window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
+      }, 2000);
     }
+
+    // 🔥 Nếu user cấp quyền lại → auto redirect về index.html
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        window.location.href = "https://tuanphong3108.github.io/weather/index.html";
+      }
+    );
   </script>
 </body>
 </html>
