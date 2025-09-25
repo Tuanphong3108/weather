@@ -103,6 +103,7 @@
             font-size: 1.5rem;
             line-height: 1;
         }
+        
         #settings-btn:hover {
             background-color: rgba(255, 255, 255, 0.1);
             transform: rotate(30deg);
@@ -326,6 +327,9 @@
         <div id="current-time"></div>
         <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">
             <span class="material-symbols-outlined">settings</span>
+            <button id="refresh-btn" class="absolute top-8 left-24 text-white text-2xl transition-transform duration-300 transform hover:rotate-90" title="Tải lại trang">
+    <img src="https://tuanphong3108.github.io/weather/Refresh.png" alt="Tải lại" style="width:2em;height:2em;display:inline-block;vertical-align:middle;">
+</button>
         </button>
         <h1 class="font-extrabold text-white text-4xl mb-6">Dự Báo Thời Tiết</h1>
         <div class="search-box">
@@ -426,6 +430,11 @@
 
             let lastFetchedCity = null;
             let lastFetchedCoords = null;
+
+            const refreshBtn = document.getElementById('refresh-btn');
+refreshBtn.addEventListener('click', () => {
+    window.location.reload();
+});
 
             // Sử dụng localStorage để ghi nhớ cài đặt
             const settings = {
