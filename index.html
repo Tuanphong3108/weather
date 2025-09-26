@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000000">
   <title>Splash Screen</title>
-  <link rel="icon" type="image/png" href="https://tuanphong3108.github.io/weather/icon.png">
+  <link rel="icon" href="icon.png">
   <style>
     body {
+      background: #000;
       margin: 0;
-      background: #121212;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -18,49 +17,25 @@
     img {
       width: 120px;
       height: 120px;
-      animation: fadeout 2s forwards 1.5s;
+      opacity: 0;
+      animation: fadeIn 1s forwards, shrinkFade 0.8s forwards 1.2s;
     }
-    @keyframes fadeout {
-      from { opacity: 1; transform: scale(1); }
-      to { opacity: 0; transform: scale(0.7); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(1.2); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes shrinkFade {
+      to { opacity: 0; transform: scale(0.5); }
     }
   </style>
 </head>
 <body>
-  <img src="https://tuanphong3108.github.io/weather/icon.png" alt="Logo" />
+  <img src="icon.png" alt="Weather Icon">
 
   <script>
-    function detectMobileOS() {
-      const ua = navigator.userAgent || navigator.vendor || window.opera;
-      if (/android/i.test(ua)) return "Android";
-      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "iOS";
-      return "Other";
-    }
-
-    window.onload = () => {
-      const os = detectMobileOS();
-
-      if (os === "Android" || os === "iOS") {
-        // 👉 Nếu là mobile OS thì chuyển thẳng đến mobile version
-        setTimeout(() => {
-          window.location.href = "https://tuanphong3108.github.io/weather/weather_mobile.html";
-        }, 2000);
-      } else {
-        // 👉 Desktop OS thì xin quyền vị trí
-        navigator.geolocation.getCurrentPosition(
-          () => {
-            setTimeout(() => {
-              window.location.href = "https://tuanphong3108.github.io/weather/weather_desktop.html";
-            }, 2000);
-          },
-          () => {
-            setTimeout(() => {
-              window.location.href = "https://tuanphong3108.github.io/weather/error_location.html";
-            }, 2000);
-          }
-        );
-      }
-    };
+    setTimeout(() => {
+      window.location.href = "offline.html";
+    }, 2000);
   </script>
 </body>
 </html>
