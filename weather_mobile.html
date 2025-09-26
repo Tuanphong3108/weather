@@ -3,125 +3,400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông báo Weather</title>
+    <title>Dự Báo Thời Tiết 🌦️</title>
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://tuanphong3108.github.io/weather/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            background-color: #1a202c;
+            overflow-x: hidden;
+        }
+        #weather-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            transition: background 1s ease-in-out;
+            background: linear-gradient(135deg, #1A202C, #2D3748);
+        }
+        .container {
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 2.5rem auto 2.5rem auto;
+            position: relative;
+            z-index: 1;
+        }
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            margin-bottom: 1.5rem;
+        }
+        .app-header img {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.7rem;
+            background: #181818;
+            box-shadow: 0 2px 8px rgba(0,0,0,.13);
+            object-fit: cover;
+        }
+        h1 {
+            font-size: 2.1rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.21);
+        }
+        .search-box {
+            position: relative;
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: none;
+            border-radius: 9999px;
+            background-color: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: background-color 0.3s;
+        }
+        input::placeholder { color: rgba(255,255,255,0.7); }
+        input:focus { background-color: rgba(255,255,255,0.4);}
+        button {
+            background-color: #1A92FF;
+            color: #fff;
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 9999px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.13s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            font-size: 1rem;
+        }
+        button:hover { background: #0070e2; }
+        button:active { transform: scale(0.97);}
+        #settings-btn {
+            background: transparent;
+            position: absolute;
+            top: 1.3rem;
+            right: 1.3rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        #settings-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: rotate(30deg);
+        }
+        #refresh-btn {
+            background: transparent;
+            position: absolute;
+            top: 1.3rem;
+            right: 5.3rem;
+            border-radius: 50%;
+            padding: 0.5rem;
+        }
+        #refresh-btn:hover { background-color: rgba(255,255,255,0.1); }
+        #current-time {
+            position: absolute;
+            top: 1.3rem;
+            left: 1.3rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            border-radius: 1rem;
+            margin-top: 0.5rem;
+            max-height: 170px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .suggestions li {
+            padding: 0.7rem 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .suggestions li:hover { background: rgba(255,255,255,0.17);}
+        .weather-info {
+            padding: 2rem 1.3rem;
+            border-radius: 2rem;
+            background: rgba(0,0,0,0.18);
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+            text-align: left;
+            transition: all 0.5s;
+        }
+        .weather-info h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        .weather-info .temp {
+            font-size: 3.3rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        .weather-info .weather-text {
+            font-size: 1.13rem;
+            font-weight: 600;
+            text-align: center;
+            margin-top: -1.2rem;
+            margin-bottom: 0.7rem;
+        }
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            font-size: 1.1rem;
+        }
+        .forecast-section {
+            margin-top: 1.2rem;
+            text-align: center;
+        }
+        .forecast-section h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .forecast-container, .hourly-forecast-container {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            justify-content: flex-start;
+            padding-bottom: 0.7rem;
+        }
+        .forecast-card, .hourly-forecast-card {
+            flex: 0 0 110px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 1.2rem;
+            padding: 0.7rem 0.3rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .forecast-card:hover, .hourly-forecast-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.19);
+        }
+        .forecast-card .icon-placeholder, .hourly-forecast-card .icon-placeholder {
+            width: 3.2rem;
+            height: 3.2rem;
+            margin: 0 auto;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #1a1a1a;
-            color: #eee;
-            text-align: center;
         }
-        .wrapper {
-            opacity: 0;
-            animation: fadeIn 0.5s ease-in-out forwards;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
+        .hourly-forecast-card {
+            flex: 0 0 90px;
+            min-width: 75px;
         }
-        .wrapper.fade-out {
-            animation: fadeOut 0.5s ease-in-out forwards;
+        .settings-panel {
+            background: rgba(0,0,0,0.62);
+            backdrop-filter: blur(10px);
+            border-radius: 1.15rem;
+            padding: 1.2rem 1rem;
+            margin-top: 1.3rem;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .weather-icon {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
+        .settings-panel h3 {
+            font-size: 1.11rem;
+            font-weight: 700;
+            margin-bottom: 0.7rem;
         }
-        .container {
-            background-color: #2b2b2b;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
-            max-width: 600px;
-            width: 100%;
-            position: relative;
-        }
-        h1 {
-            color: #4CAF50;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-        }
-        .highlight {
-            font-weight: bold;
-            color: #FF9800;
-        }
-        .close-button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
+        .settings-panel label {
+            display: block;
+            margin-bottom: 0.4rem;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 20px;
-            background-color: #007BFF;
+            user-select: none;
         }
-        .close-button:hover {
-            background-color: #0056b3;
-        }
-        .success-message {
-            opacity: 0;
-            display: none;
-            flex-direction: column;
+        .location-btn { background: #4A5568; }
+        .location-btn:hover { background: #2D3748;}
+        #loading-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            display: flex; flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 40px;
-            color: #4CAF50;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-            animation: fadeIn 0.5s ease-in-out forwards;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            gap: 1rem;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        #loading-overlay.visible { opacity: 1; visibility: visible; }
+        #loading-icon { width: 5rem; height: 5rem; animation: pulse 1.5s infinite;}
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+        #about-btn {
+            position: fixed;
+            left: 1rem;
+            bottom: 1rem;
+            z-index: 100;
+            background: rgba(20,20,20,0.92);
+            color: #fff;
+            padding: 0.65em 1.1em;
+            border-radius: 9999px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.16);
+            text-decoration: none;
+            font-size: 1em;
+            transition: background .2s;
         }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
+        #about-btn:hover { background: #1a92ff; color: #fff; }
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.1rem 0.1rem;
+                border-radius: 0.8rem;
+                max-width: 99vw;
+                margin: 0.7rem 0;
+            }
+            .app-header img { width: 2rem; height: 2rem; border-radius: 0.5rem; }
+            h1 { font-size: 1.25rem;}
+            .search-box { flex-direction: column; gap: 0.5rem; }
+            input, button { font-size: 1em;}
+            button, input { width: 100%; min-width: 0;}
+            #settings-btn { top: 0.7rem; right: 0.7rem;}
+            #refresh-btn { top: 0.7rem; right: 3.5rem; }
+            #current-time { top: 0.7rem; left: 0.7rem; font-size: 1rem;}
+            .weather-info { padding: 1rem 0.3rem; border-radius: 1rem;}
+            .forecast-card, .hourly-forecast-card { flex: 0 0 73px; border-radius: 0.7rem; padding: 0.4rem 0.1rem;}
+            .forecast-card .icon-placeholder, .hourly-forecast-card .icon-placeholder { width: 2rem; height: 2rem;}
+            .settings-panel { padding: 0.8rem 0.2rem; border-radius: 0.6rem; }
+            #about-btn { left: 0.5rem; bottom: 0.5rem; font-size: 0.92em; padding: 0.5em 1em;}
         }
     </style>
 </head>
 <body>
-
-<div class="wrapper" id="notice-wrapper">
-    <img src="https://tuanphong3108.github.io/weather/icon.png" alt="Weather Icon" class="weather-icon">
-    <div class="container">
-        <h1>Thông báo</h1>
-        <p>Hiện tại <span class="highlight">Weather</span> chỉ khả dụng trên trình duyệt dành cho <span class="highlight">Windows, MacOS, Linux, ChromeOS,... (Máy tính)</span></p>
-        <button class="close-button" id="close-button">Đóng</button>
+    <div id="weather-bg"></div>
+    <a href="https://tuanphong3108.github.io/weather/about.html" id="about-btn">About</a>
+    <div id="main-weather-container" class="container">
+        <div class="app-header">
+            <img src="https://tuanphong3108.github.io/weather/icon.png" alt="App icon">
+            <span class="sr-only">Weather App</span>
+        </div>
+        <div id="current-time"></div>
+        <button id="settings-btn" class="absolute top-8 right-8 text-white text-2xl transition-transform duration-300 transform hover:rotate-45">
+            <span class="material-symbols-outlined">settings</span>
+        </button>
+        <button id="refresh-btn" class="absolute top-8 right-24 text-white text-2xl transition-transform duration-300 transform hover:rotate-90" title="Tải lại trang">
+            <img src="https://tuanphong3108.github.io/weather/Refresh.png" alt="Tải lại" style="width:2em;height:2em;display:inline-block;vertical-align:middle;">
+        </button>
+        <h1 class="font-extrabold text-white text-4xl mb-6">Dự Báo Thời Tiết</h1>
+        <div class="search-box">
+            <input type="text" id="city-input" placeholder="Nhập tên thành phố...">
+            <button id="search-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">Tìm Kiếm</button>
+            <button id="current-location-btn" class="location-btn text-white font-bold py-3 px-6 rounded-full transition-colors duration-200">Vị trí hiện tại</button>
+            <ul id="suggestions" class="suggestions hidden"></ul>
+        </div>
+        <div id="weather-info" class="weather-info hidden">
+            <!-- Dữ liệu thời tiết sẽ được chèn vào đây bởi JavaScript -->
+        </div>
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="settings-panel hidden">
+            <h2 class="text-3xl font-bold mb-4">Cài Đặt</h2>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-2">Kiểu giờ</h3>
+                <div class="flex gap-4">
+                    <label>
+                        <input type="radio" name="time-format" value="24h" checked>
+                        24-Hours
+                    </label>
+                    <label>
+                        <input type="radio" name="time-format" value="12h">
+                        12-Hours
+                    </label>
+                </div>
+            </div>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-2">Đơn vị nhiệt độ</h3>
+                <div class="flex gap-4">
+                    <label>
+                        <input type="radio" name="temp-unit" value="celsius" checked>
+                        Celsius (°C)
+                    </label>
+                    <label>
+                        <input type="radio" name="temp-unit" value="fahrenheit">
+                        Fahrenheit (°F)
+                    </label>
+                </div>
+            </div>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-2">Đơn vị tốc độ gió</h3>
+                <div class="flex gap-4">
+                    <label>
+                        <input type="radio" name="wind-unit" value="ms" checked>
+                        m/s
+                    </label>
+                    <label>
+                        <input type="radio" name="wind-unit" value="kmh">
+                        km/h
+                    </label>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Kiểu Icon</h3>
+                <div class="flex flex-col gap-2">
+                    <label>
+                        <input type="radio" name="icon-style" value="emoji">
+                        Emoji
+                    </label>
+                    <label>
+                        <input type="radio" name="icon-style" value="material">
+                        Material 3
+                    </label>
+                    <label>
+                        <input type="radio" name="icon-style" value="pixel" checked>
+                        Google Pixel Weather
+                    </label>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-600">
+                <h3 class="text-xl font-semibold mb-2">Vị trí</h3>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" id="auto-location-toggle">
+                    Tự động hiện thời tiết ở vị trí hiện tại
+                </label>
+            </div>
+        </div>
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="hidden">
+            <img id="loading-icon" alt="Loading icon" />
+            <p id="loading-text" class="text-lg font-semibold">Đang tải dữ liệu...</p>
+        </div>
     </div>
-</div>
-
-<div class="success-message" id="success-message">
-    <p>Thông báo đã được đóng thành công!</p>
-    <p>Vui lòng đóng tab này.</p>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const wrapper = document.getElementById('notice-wrapper');
-        const closeButton = document.getElementById('close-button');
-        const successMessage = document.getElementById('success-message');
-
-        // Xử lý sự kiện khi click nút "Đóng"
-        closeButton.addEventListener('click', () => {
-            wrapper.classList.add('fade-out');
-            setTimeout(() => {
-                wrapper.style.display = 'none';
-                successMessage.style.display = 'flex';
-            }, 500); // Thời gian fade-out khớp với CSS
-        });
-    });
-</script>
-
-</body>
-</html>
+    <script>
