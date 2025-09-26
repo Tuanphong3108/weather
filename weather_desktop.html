@@ -994,6 +994,26 @@ refreshBtn.addEventListener('click', () => {
         });
     </script>
     <script>
+function checkNetwork() {
+    if (!navigator.onLine) {
+        // Mất mạng thì redirect sang offline
+        window.location.href = "offline.html";
+    }
+}
+
+// Check ngay khi load
+checkNetwork();
+
+// Check định kỳ mỗi 5s
+setInterval(checkNetwork, 5000);
+
+// Bắt sự kiện mất mạng ngay lập tức
+window.addEventListener("offline", () => {
+    window.location.href = "offline.html";
+});
+</script>
+
+    <script>
         // Đăng ký Service Worker để ứng dụng hoạt động offline
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
