@@ -103,7 +103,7 @@
 
 <div class="success-message" id="success-message">
     <p>Thông báo đã được đóng thành công!</p>
-    <p>Vui lòng đóng tab này.</p>
+    <p>Vui lòng tự đóng tab này 👋</p>
 </div>
 
 <script>
@@ -112,13 +112,21 @@
         const closeButton = document.getElementById('close-button');
         const successMessage = document.getElementById('success-message');
 
-        // Xử lý sự kiện khi click nút "Đóng"
         closeButton.addEventListener('click', () => {
             wrapper.classList.add('fade-out');
             setTimeout(() => {
                 wrapper.style.display = 'none';
-                successMessage.style.display = 'flex';
-            }, 500); // Thời gian fade-out khớp với CSS
+
+                // Thử đóng tab
+                setTimeout(() => {
+                    window.close();
+                    // Nếu không đóng được (tab không mở bằng script)
+                    if (!window.closed) {
+                        successMessage.style.display = 'flex';
+                        alert("Vui lòng tự đóng tab này nhé 👋");
+                    }
+                }, 1000);
+            }, 500);
         });
     });
 </script>
