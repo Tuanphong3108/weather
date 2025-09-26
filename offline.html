@@ -77,6 +77,15 @@
   </div>
 
   <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/weather/sw.js")
+    .then(() => console.log("Service Worker đã đăng ký"))
+    .catch(err => console.error("SW đăng ký lỗi:", err));
+}
+</script>
+
+
+  <script>
     function isMobile() {
       const ua = navigator.userAgent || navigator.vendor || window.opera;
       return /android|iphone|ipad|ipod/i.test(ua);
