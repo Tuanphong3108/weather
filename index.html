@@ -33,6 +33,15 @@
   <img src="icon.png" alt="Weather Icon">
 
   <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/weather/sw.js")
+    .then(() => console.log("Service Worker đã đăng ký"))
+    .catch(err => console.error("SW đăng ký lỗi:", err));
+}
+</script>
+
+
+  <script>
     setTimeout(() => {
       window.location.href = "offline.html";
     }, 2000);
