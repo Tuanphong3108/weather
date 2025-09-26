@@ -1,50 +1,76 @@
-// sw.js
-const CACHE_NAME = "weather-cache-v1";
-const ASSETS = [
-  "/", // trang gốc
-  "/index.html",
-  "/offline.html",
-  "/weather_desktop.html",
-  "/weather_mobile.html",
-  "/icon.png",
+const CACHE_VERSION = "v2"; // đổi số version mỗi lần update
+const CACHE_NAME = `weather-cache-${CACHE_VERSION}`;
+const OFFLINE_URL = "offline.html";
+
+const PRECACHE_ASSETS = [
+  OFFLINE_URL,
+  "icon.png",
+  "weather_desktop.html",
+  "weather_mobile.html",
+  "index.html"
 ];
 
-// Cài đặt SW và cache asset
-self.addEventListener("install", event => {
+// Cài đặt SW -> cache trước mấy file quan trọng
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS);
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(PRECACHE_ASSETS);
     })
   );
+  self.skipWaiting();
 });
 
-// Activate và dọn cache cũ
-self.addEventListener("activate", event => {
+// Kích hoạt -> xóa cache cũ
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      );
-    })
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log("🗑 Xóa cache cũ:", key);
+            return caches.delete(key);
+          }
+        })
+      )
+    )
   );
+  self.clients.claim();
 });
 
-// Fetch: dùng cache trước, nếu fail thì fallback offline.html
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Lưu bản copy vào cache
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return response;
+// Fetch -> online first, fallback cache/offline
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      (async () => {
+        try {
+          const networkResponse = await fetch(event.request);
+          return networkResponse;
+        } catch (error) {
+          const cache = await caches.open(CACHE_NAME);
+          const cachedResponse = await cache.match(event.request);
+          return cachedResponse || cache.match(OFFLINE_URL);
+        }
+      })()
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request).then((cacheRes) => {
+        return (
+          cacheRes ||
+          fetch(event.request)
+            .then((networkRes) => {
+              return caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, networkRes.clone());
+                return networkRes;
+              });
+            })
+            .catch(() => {
+              if (event.request.destination === "image") {
+                return caches.match("icon.png");
+              }
+            })
+        );
       })
-      .catch(() => {
-        // Nếu offline thì fallback
-        return caches.match(event.request).then(cached => {
-          if (cached) return cached;
-          return caches.match("/weather/offline.html");
-        });
-      })
-  );
+    );
+  }
 });
