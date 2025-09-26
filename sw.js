@@ -1,50 +1,50 @@
-const CACHE_NAME = 'weather-app-cache-v1';
-// Danh sách các tệp cần cache để chạy offline
-const urlsToCache = [
-  './',
-  './weather_app.html',
-  './manifest.json',
-  './icon.png'
+// sw.js
+const CACHE_NAME = "weather-cache-v1";
+const ASSETS = [
+  "/", // trang gốc
+  "/index.html",
+  "/offline.html",
+  "/weather_desktop.html",
+  "/weather_mobile.html",
+  "/icon.png",
 ];
 
-self.addEventListener('install', (event) => {
-  // Caching các tệp khi service worker được cài đặt
+// Cài đặt SW và cache asset
+self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS);
+    })
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  // Lắng nghe các request và trả về từ cache nếu có
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Trả về từ cache nếu tìm thấy
-        if (response) {
-          return response;
-        }
-        // Nếu không có trong cache, fetch từ mạng
-        return fetch(event.request);
-      })
-  );
-});
-
-self.addEventListener('activate', (event) => {
-  // Xóa các cache cũ
-  const cacheWhitelist = [CACHE_NAME];
+// Activate và dọn cache cũ
+self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(keys => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       );
     })
+  );
+});
+
+// Fetch: dùng cache trước, nếu fail thì fallback offline.html
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        // Lưu bản copy vào cache
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => {
+        // Nếu offline thì fallback
+        return caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          return caches.match("/weather/offline.html");
+        });
+      })
   );
 });
