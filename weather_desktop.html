@@ -947,8 +947,13 @@ refreshBtn.addEventListener('click', () => {
             });
 
             settingsBtn.addEventListener('click', () => {
-                settingsPanel.classList.toggle('hidden');
-            });
+    settingsPanel.classList.toggle('hidden');
+    if (!settingsPanel.classList.contains('hidden')) {
+        setTimeout(() => {
+            settingsPanel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 100);
+    }
+});
 
             settingsPanel.addEventListener('change', (e) => {
     if (e.target.name === 'temp-unit') {
