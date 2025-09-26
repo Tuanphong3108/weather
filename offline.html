@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lỗi kết nối</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+    #loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    .spinner {
+      border: 6px solid #2b2b2b;
+      border-top: 6px solid #4CAF50;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    #error {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      background: #2b2b2b;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    h1 {
+      color: #FF9800;
+      margin-bottom: 15px;
+    }
+    p {
+      margin-bottom: 20px;
+    }
+    button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Đang kiểm tra kết nối...</p>
+  </div>
+
+  <div id="error">
+    <h1>Lỗi mạng</h1>
+    <p>Không có kết nối Internet, vui lòng thử lại.</p>
+    <button onclick="retry()">Thử lại</button>
+  </div>
+
+  <script>
+    function isMobile() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      return /android|iphone|ipad|ipod/i.test(ua);
+    }
+
+    function checkConnection() {
+      document.body.style.background = "#000";
+      document.getElementById("loading").style.display = "flex";
+      
+      setTimeout(() => {
+        if (navigator.onLine) {
+          window.location.href = "weather_desktop.html";
+        } else {
+          document.body.style.background = "#1a1a1a";
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("error").style.display = "flex";
+        }
+      }, 1000);
+    }
+
+    function retry() {
+      location.reload();
+    }
+
+    // chạy logic khi load
+    if (isMobile()) {
+      window.location.href = "weather_mobile.html";
+    } else {
+      checkConnection();
+    }
+  </script>
+</body>
+</html>
