@@ -2,105 +2,70 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About - Weather App</title>
-  <!-- Thêm theme-color cho header đen -->
+  <link rel="icon" href="icon.png" type="image/png">
   <meta name="theme-color" content="#000000">
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://tuanphong3108.github.io/weather/icon.png">
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
       background: #121212;
-      color: #e0e0e0;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
-      min-height: 100vh;
+      height: 100vh;
+      margin: 0;
     }
     .card {
-      background: #1f1f1f;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 600px;
-      width: 100%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .app-icon {
-      width: 72px;
-      height: 72px;
-      margin-bottom: 10px;
-      margin-top: 6px;
+      background: #1e1e1e;
+      padding: 2rem;
       border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.15);
-      background: #181818;
-      object-fit: cover;
-      display: block;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      animation: fadeIn 1s ease;
+    }
+    .card img {
+      width: 96px;
+      height: 96px;
+      margin-bottom: 1rem;
     }
     h1 {
-      margin-top: 0;
-      margin-bottom: 15px;
-      color: #90caf9;
-      text-align: center;
-      font-size: 1.8em;
+      margin-bottom: 0.5rem;
     }
     p {
-      line-height: 1.6;
-      margin-bottom: 12px;
-      font-size: 1em;
+      margin: 0.5rem 0;
+      line-height: 1.5;
     }
-    a {
-      color: #64b5f6;
-      text-decoration: none;
-      word-break: break-word;
+    .btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background: #64b5f6;
+      color: #121212;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
     }
-    a:hover {
-      text-decoration: underline;
+    .btn:hover {
+      background: #42a5f5;
     }
-    .footer {
-      margin-top: 20px;
-      font-size: 0.85em;
-      color: #888;
-      text-align: center;
-    }
-    @media (max-width: 480px) {
-      .card {
-        padding: 15px;
-        border-radius: 8px;
-      }
-      h1 {
-        font-size: 1.4em;
-      }
-      p {
-        font-size: 0.95em;
-      }
-      .app-icon {
-        width: 56px;
-        height: 56px;
-      }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <img src="https://tuanphong3108.github.io/weather/icon.png" alt="Weather App Icon" class="app-icon">
-    <h1>🌦 Weather App</h1>
-    <p>
-      Ứng dụng thời tiết này được phát triển bởi <strong>Phong VN</strong>,
-      với mục tiêu mang đến trải nghiệm theo dõi thời tiết <em>đơn giản, đẹp mắt và chính xác</em>.
-    </p>
-    <p>
-      Dữ liệu thời tiết được lấy từ <a href="https://open-meteo.com/" target="_blank">Open-Meteo API</a>.
-      Biểu tượng và giao diện được thiết kế theo phong cách Emoji, Material Design và Pixel Weather.
-    </p>
-    <div class="footer">
-      <a href="https://tuanphong3108.github.io/weather/">🔙 Quay lại</a> · © 2025 Phong VN
-    </div>
+    <img src="icon.png" alt="Weather Icon">
+    <h1>Weather App</h1>
+    <p><strong>Tác giả:</strong> Phong VN</p>
+    <p>Ứng dụng dự báo thời tiết cá nhân, thiết kế dark mode.</p>
+    <p><strong>Lưu ý:</strong> Weather hiện <span style="color:#ff5252;">không hỗ trợ mobile</span>, chỉ dành cho desktop.</p>
+    <p>Repo GitHub: <a href="https://tuanphong3108.github.io/weather" target="_blank" style="color:#64b5f6;">Xem tại đây</a></p>
+    <button class="btn" onclick="window.location.href='index.html'">Quay lại trang chính</button>
   </div>
 </body>
 </html>
