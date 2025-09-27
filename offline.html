@@ -114,11 +114,6 @@
   </div>
 
 <script>
-function isMobile() {
-  const ua = navigator.userAgent.toLowerCase();
-  return /mobile|android|iphone|ipad/.test(ua);
-}
-
 async function retry() {
   document.getElementById("error").style.display = "none";
   document.getElementById("loading").style.display = "flex";
@@ -128,7 +123,7 @@ async function retry() {
   try {
     const res = await fetch("icon.png", { cache: "no-store" });
     if (res.ok) {
-      window.location.href = isMobile() ? "weather_mobile.html" : "weather_desktop.html";
+      window.location.href = "weather_desktop.html"; // luôn về desktop
       return;
     }
   } catch (e) {}
@@ -136,6 +131,15 @@ async function retry() {
   document.getElementById("loading").style.display = "none";
   document.getElementById("error").style.display = "block";
 }
+
+// Auto-check khi load
+setTimeout(() => {
+  if (navigator.onLine) {
+    window.location.href = "weather_desktop.html";
+  } else {
+    document.getElementById("error").style.display = "block";
+  }
+}, 1000);
 </script>
 </body>
 </html>
