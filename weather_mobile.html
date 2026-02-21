@@ -1,135 +1,1040 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông báo Weather</title>
-    <link rel="icon" type="image/png" href="https://tuanphong3108.github.io/weather/icon.png">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #1a1a1a;
-            color: #eee;
-            text-align: center;
-        }
-        .wrapper {
-            opacity: 0;
-            animation: fadeIn 0.5s ease-in-out forwards;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-        .wrapper.fade-out {
-            animation: fadeOut 0.5s ease-in-out forwards;
-        }
-        .weather-icon {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
-        }
-        .container {
-            background-color: #2b2b2b;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
-            max-width: 600px;
-            width: 100%;
-            position: relative;
-        }
-        h1 {
-            color: #4CAF50;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-        }
-        .highlight {
-            font-weight: bold;
-            color: #FF9800;
-        }
-        .close-button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 20px;
-            background-color: #007BFF;
-        }
-        .close-button:hover {
-            background-color: #0056b3;
-        }
-        .success-message {
-            opacity: 0;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
-            color: #4CAF50;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-            animation: fadeIn 0.5s ease-in-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a202c">
+  <title>Thời Tiết 🌦️</title>
+  <link rel="icon" type="image/png" href="https://tuanphong3108.github.io/weather/icon.png">
+  <link rel="apple-touch-icon" href="https://tuanphong3108.github.io/weather/icon.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <style>
+    @font-face {
+      font-family: 'Google Sans';
+      src: url('https://tuanphong3108.github.io/google-sans-do-not-access/GoogleSans-Regular.ttf') format('truetype');
+      font-weight: normal;
+    }
+    @font-face {
+      font-family: 'Google Sans';
+      src: url('https://tuanphong3108.github.io/google-sans-do-not-access/GoogleSans-Bold.ttf') format('truetype');
+      font-weight: bold;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg1: #1a202c;
+      --bg2: #2d3748;
+      --card: rgba(0,0,0,0.28);
+      --glass: rgba(255,255,255,0.10);
+      --accent: #1A92FF;
+      --radius: 22px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html { height: 100%; }
+
+    body {
+      font-family: 'Google Sans', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      color: #fff;
+      background: linear-gradient(160deg, var(--bg1), var(--bg2));
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #weather-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      transition: background 1.2s ease;
+      background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    }
+
+    /* ── LAYOUT ── */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .topbar-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    #topbar-clock {
+      font-size: 13px;
+      opacity: 0.65;
+      font-weight: 500;
+    }
+    .topbar-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      background: var(--glass);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      transition: background 0.2s, transform 0.2s;
+      touch-action: manipulation;
+    }
+    .icon-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.93); }
+    .material-symbols-outlined { font-size: 22px; }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-input-wrap {
+      flex: 1;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--glass);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 9999px;
+      padding: 13px 20px;
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .search-input::placeholder { color: rgba(255,255,255,0.5); }
+    .search-input:focus {
+      background: rgba(255,255,255,0.18);
+      border-color: var(--accent);
+    }
+    .search-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 9999px;
+      padding: 13px 20px;
+      font-weight: 700;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      touch-action: manipulation;
+      white-space: nowrap;
+    }
+    .search-btn:active { background: #0070e2; transform: scale(0.95); }
+
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0; right: 0;
+      background: rgba(15,20,30,0.97);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      overflow: hidden;
+      z-index: 100;
+      list-style: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .suggestions li {
+      padding: 14px 20px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+    .suggestions li:last-child { border-bottom: none; }
+    .suggestions li:active { background: rgba(255,255,255,0.1); }
+    .suggestions li::before {
+      content: 'location_on';
+      font-family: 'Material Symbols Outlined';
+      font-size: 18px;
+      opacity: 0.5;
+    }
+
+    /* ── LOADING ── */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 40px 0;
+    }
+    #loading img {
+      width: 72px;
+      height: 72px;
+      animation: float 2s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.06); }
+    }
+    #loading p { font-size: 15px; opacity: 0.7; }
+
+    /* ── ERROR ── */
+    #error-msg {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── HERO CARD ── */
+    .hero-card {
+      background: var(--card);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 24px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+      animation: cardIn 0.5s ease;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .city-name {
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: -0.3px;
+    }
+    .weather-desc {
+      font-size: 14px;
+      opacity: 0.75;
+      margin-bottom: 8px;
+    }
+    .main-icon-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0;
+    }
+    #main-weather-icon {
+      width: 80px;
+      height: 80px;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.3));
+      animation: iconPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes iconPop {
+      from { opacity: 0; transform: scale(0.6); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .main-temp-text {
+      font-size: 72px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -3px;
+    }
+    .feels-like {
+      font-size: 13px;
+      opacity: 0.6;
+      margin-top: 2px;
+    }
+    .hi-lo {
+      display: flex;
+      gap: 16px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .hi-lo .hi { color: #fbbf24; }
+    .hi-lo .lo { color: #93c5fd; }
+
+    /* ── DETAILS GRID ── */
+    .details-card {
+      background: var(--card);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      animation: cardIn 0.5s ease 0.1s both;
+    }
+    .detail-tile {
+      background: rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .detail-tile img {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .detail-tile .material-symbols-outlined {
+      font-size: 26px;
+      flex-shrink: 0;
+      opacity: 0.8;
+    }
+    .detail-info { display: flex; flex-direction: column; gap: 2px; }
+    .detail-label { font-size: 11px; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-val { font-size: 16px; font-weight: 700; }
+
+    /* ── SECTION ── */
+    .section-card {
+      background: var(--card);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      animation: cardIn 0.5s ease 0.2s both;
+    }
+    .section-card + .section-card { animation-delay: 0.3s; }
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0.55;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    /* ── DAILY FORECAST ── */
+    .daily-list { display: flex; flex-direction: column; gap: 6px; }
+    .daily-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .daily-row:active { background: rgba(255,255,255,0.07); }
+    .daily-day { width: 48px; font-size: 14px; font-weight: 600; opacity: 0.8; }
+    .daily-icon { width: 36px; height: 36px; flex-shrink: 0; }
+    .daily-bar-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 12px;
+    }
+    .daily-lo { font-size: 13px; opacity: 0.55; font-weight: 600; min-width: 28px; text-align: right; }
+    .daily-hi { font-size: 13px; font-weight: 700; min-width: 28px; }
+    .temp-bar {
+      flex: 1;
+      height: 5px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.15);
+      overflow: hidden;
+    }
+    .temp-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #93c5fd, #fbbf24);
+    }
+
+    /* ── HOURLY FORECAST ── */
+    .hourly-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .hourly-scroll::-webkit-scrollbar { display: none; }
+    .hourly-card {
+      flex: 0 0 72px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 12px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      scroll-snap-align: start;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.2s;
+    }
+    .hourly-card.now-card {
+      background: rgba(26,146,255,0.25);
+      border-color: rgba(26,146,255,0.4);
+    }
+    .hourly-card:active { background: rgba(255,255,255,0.16); }
+    .hourly-time { font-size: 11px; font-weight: 700; opacity: 0.7; }
+    .hourly-icon { width: 36px; height: 36px; }
+    .hourly-temp { font-size: 14px; font-weight: 700; }
+
+    /* ── SETTINGS ── */
+    .settings-card {
+      background: rgba(10,15,25,0.6);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .settings-title { font-size: 17px; font-weight: 700; }
+    .settings-group { display: flex; flex-direction: column; gap: 8px; }
+    .settings-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0.5;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pill-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid transparent;
+      border-radius: 99px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      touch-action: manipulation;
+    }
+    .pill-label input { display: none; }
+    .pill-label.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(26,146,255,0.4);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 26px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.15);
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+    .divider { height: 1px; background: rgba(255,255,255,0.08); }
+
+    /* ── HIDDEN ── */
+    .hidden { display: none !important; }
+
+    /* ── PULL TO REFRESH hint ── */
+    .refresh-hint {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.35;
+      padding: 4px 0 0;
+    }
+  </style>
 </head>
 <body>
+<div id="weather-bg"></div>
 
-<div class="wrapper" id="notice-wrapper">
-    <img src="https://tuanphong3108.github.io/weather/icon.png" alt="Weather Icon" class="weather-icon">
-    <div class="container">
-        <h1>Thông báo</h1>
-        <p>Hiện tại <span class="highlight">Weather</span> chỉ khả dụng trên trình duyệt dành cho <span class="highlight">Máy tính</span>, bạn hãy quay lại sau</p>
-        <button class="close-button" id="close-button">Đóng</button>
+<div class="app">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <img id="topbar-icon" src="https://tuanphong3108.github.io/weather/clear_day.png" alt="" style="width:28px;height:28px;">
+      <div>
+        <div class="topbar-title">Thời Tiết</div>
+        <div id="topbar-clock"></div>
+      </div>
     </div>
-</div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="refresh-btn" title="Tải lại">
+        <span class="material-symbols-outlined">refresh</span>
+      </button>
+      <button class="icon-btn" id="settings-btn" title="Cài đặt">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+    </div>
+  </div>
 
-<div class="success-message" id="success-message">
-    <p>Thông báo đã được đóng thành công!</p>
-    <p>Vui lòng tự đóng tab này 👋</p>
+  <!-- Search -->
+  <div class="search-wrap">
+    <div class="search-input-wrap">
+      <input type="text" class="search-input" id="city-input" placeholder="🔍  Nhập thành phố..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <ul id="suggestions" class="suggestions hidden"></ul>
+    </div>
+    <button class="search-btn" id="search-btn">Tìm</button>
+    <button class="icon-btn" id="location-btn" title="GPS">
+      <span class="material-symbols-outlined">my_location</span>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="hidden">
+    <img src="https://tuanphong3108.github.io/weather/clear_day.png" alt="">
+    <p>Đang tải thời tiết...</p>
+  </div>
+
+  <!-- Error -->
+  <div id="error-msg" class="hidden"></div>
+
+  <!-- Weather Content -->
+  <div id="weather-content" class="hidden">
+
+    <!-- Hero -->
+    <div class="hero-card" id="hero-card">
+      <div class="city-name" id="city-name"></div>
+      <div class="weather-desc" id="weather-desc"></div>
+      <div class="main-icon-row">
+        <img id="main-weather-icon" src="" alt="">
+        <div class="main-temp-text" id="main-temp"></div>
+      </div>
+      <div class="hi-lo">
+        <span class="hi" id="temp-hi">↑ --°</span>
+        <span class="lo" id="temp-lo">↓ --°</span>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="details-card" id="details-card"></div>
+
+    <!-- Hourly -->
+    <div class="section-card">
+      <div class="section-label">⏱ Theo giờ</div>
+      <div class="hourly-scroll" id="hourly-scroll"></div>
+    </div>
+
+    <!-- Daily -->
+    <div class="section-card">
+      <div class="section-label">📅 6 ngày tới</div>
+      <div class="daily-list" id="daily-list"></div>
+    </div>
+
+    <div class="refresh-hint">Kéo xuống để tải lại 🔄</div>
+
+  </div>
+
+  <!-- Settings -->
+  <div id="settings-panel" class="settings-card hidden">
+    <div class="settings-title">⚙️ Cài Đặt</div>
+
+    <div class="settings-group">
+      <div class="settings-group-label">Nhiệt độ</div>
+      <div class="pill-row">
+        <label class="pill-label" id="pill-c"><input type="radio" name="temp-unit" value="celsius"> °C</label>
+        <label class="pill-label" id="pill-f"><input type="radio" name="temp-unit" value="fahrenheit"> °F</label>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="settings-group">
+      <div class="settings-group-label">Tốc độ gió</div>
+      <div class="pill-row">
+        <label class="pill-label" id="pill-ms"><input type="radio" name="wind-unit" value="ms"> m/s</label>
+        <label class="pill-label" id="pill-kmh"><input type="radio" name="wind-unit" value="kmh"> km/h</label>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="settings-group">
+      <div class="settings-group-label">Định dạng giờ</div>
+      <div class="pill-row">
+        <label class="pill-label" id="pill-24h"><input type="radio" name="time-format" value="24h"> 24h</label>
+        <label class="pill-label" id="pill-12h"><input type="radio" name="time-format" value="12h"> 12h</label>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="settings-group">
+      <div class="toggle-row">
+        <span>Tự động dùng GPS</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="auto-location">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const wrapper = document.getElementById('notice-wrapper');
-        const closeButton = document.getElementById('close-button');
-        const successMessage = document.getElementById('success-message');
+// ── CONFIG ──────────────────────────────────────────────────────
+const PIXEL_BASE = 'https://tuanphong3108.github.io/weather/';
 
-        closeButton.addEventListener('click', () => {
-            wrapper.classList.add('fade-out');
-            setTimeout(() => {
-                wrapper.style.display = 'none';
+const PIXEL_ICONS = {
+  '0':  { day: 'clear_day.png', night: 'clear_night.png' },
+  '1':  { day: 'mostly_clear_day.png', night: 'mostly_clear_night.png' },
+  '2':  { day: 'partly_cloudy_day.png', night: 'partly_cloudy_night.png' },
+  '3':  { day: 'cloudy.png', night: 'cloudy.png' },
+  '45': { day: 'haze_fog_dust_smoke.png', night: 'haze_fog_dust_smoke.png' },
+  '48': { day: 'haze_fog_dust_smoke.png', night: 'haze_fog_dust_smoke.png' },
+  '51': { day: 'drizzle.png', night: 'drizzle.png' },
+  '53': { day: 'drizzle.png', night: 'drizzle.png' },
+  '55': { day: 'drizzle.png', night: 'drizzle.png' },
+  '56': { day: 'sleet_hail.png', night: 'sleet_hail.png' },
+  '57': { day: 'sleet_hail.png', night: 'sleet_hail.png' },
+  '61': { day: 'showers_rain.png', night: 'showers_rain.png' },
+  '63': { day: 'showers_rain.png', night: 'showers_rain.png' },
+  '65': { day: 'heavy_rain.png', night: 'heavy_rain.png' },
+  '66': { day: 'mixed_rain_hail_sleet.png', night: 'mixed_rain_hail_sleet.png' },
+  '67': { day: 'mixed_rain_hail_sleet.png', night: 'mixed_rain_hail_sleet.png' },
+  '71': { day: 'showers_snow.png', night: 'showers_snow.png' },
+  '73': { day: 'showers_snow.png', night: 'showers_snow.png' },
+  '75': { day: 'heavy_snow.png', night: 'heavy_snow.png' },
+  '77': { day: 'flurries.png', night: 'flurries.png' },
+  '80': { day: 'scattered_showers_day.png', night: 'scattered_showers_night.png' },
+  '81': { day: 'showers_rain.png', night: 'showers_rain.png' },
+  '82': { day: 'heavy_rain.png', night: 'heavy_rain.png' },
+  '85': { day: 'scattered_snow_showers_day.png', night: 'scattered_snow_showers_night.png' },
+  '86': { day: 'showers_snow.png', night: 'showers_snow.png' },
+  '95': { day: 'isolated_thunderstorms.png', night: 'isolated_thunderstorms.png' },
+  '96': { day: 'isolated_scattered_thunderstorms_day.png', night: 'isolated_scattered_thunderstorms_night.png' },
+  '99': { day: 'strong_thunderstorms.png', night: 'strong_thunderstorms.png' },
+};
 
-                // Thử đóng tab
-                setTimeout(() => {
-                    window.close();
-                    // Nếu không đóng được (tab không mở bằng script)
-                    if (!window.closed) {
-                        successMessage.style.display = 'flex';
-                        alert("Vui lòng tự đóng tab này nhé 👋");
-                    }
-                }, 1000);
-            }, 500);
+const WEATHER_INFO = {
+  0:  { text: 'Trời quang, mây tạnh',      bg: ['#4FC3F7','#0288D1'] },
+  1:  { text: 'Chủ yếu nắng',              bg: ['#FDD835','#43A047'] },
+  2:  { text: 'Mây rải rác',               bg: ['#90A4AE','#546E7A'] },
+  3:  { text: 'Trời nhiều mây',            bg: ['#78909C','#455A64'] },
+  45: { text: 'Sương mù',                  bg: ['#B0BEC5','#78909C'] },
+  48: { text: 'Sương mù đóng băng',        bg: ['#B0BEC5','#607D8B'] },
+  51: { text: 'Mưa phùn nhẹ',             bg: ['#64B5F6','#1565C0'] },
+  53: { text: 'Mưa phùn vừa',             bg: ['#42A5F5','#0D47A1'] },
+  55: { text: 'Mưa phùn nặng',            bg: ['#2196F3','#0D47A1'] },
+  61: { text: 'Mưa nhẹ',                  bg: ['#5C6BC0','#283593'] },
+  63: { text: 'Mưa vừa',                  bg: ['#3949AB','#1A237E'] },
+  65: { text: 'Mưa nặng hạt',             bg: ['#303F9F','#0D1B6E'] },
+  71: { text: 'Tuyết rơi nhẹ',            bg: ['#B3E5FC','#4FC3F7'] },
+  73: { text: 'Tuyết rơi vừa',            bg: ['#81D4FA','#29B6F6'] },
+  75: { text: 'Tuyết rơi nặng',           bg: ['#4FC3F7','#0288D1'] },
+  80: { text: 'Mưa rào nhẹ',              bg: ['#6D4C41','#3E2723'] },
+  81: { text: 'Mưa rào vừa',              bg: ['#5D4037','#3E2723'] },
+  82: { text: 'Mưa rào dữ dội',           bg: ['#4E342E','#1C0A00'] },
+  95: { text: 'Dông bão',                 bg: ['#455A64','#1C313A'] },
+  96: { text: 'Dông + mưa đá nhẹ',        bg: ['#37474F','#102027'] },
+  99: { text: 'Dông + mưa đá nặng',       bg: ['#263238','#000a12'] },
+};
+
+// ── SETTINGS ────────────────────────────────────────────────────
+let settings = { tempUnit: 'celsius', windUnit: 'ms', timeFormat: '24h', autoLocation: false };
+
+function loadSettings() {
+  try { const s = localStorage.getItem('wx_mob_settings'); if (s) settings = {...settings, ...JSON.parse(s)}; } catch(e) {}
+}
+function saveSettings() {
+  try { localStorage.setItem('wx_mob_settings', JSON.stringify(settings)); } catch(e) {}
+}
+function applyPills() {
+  document.querySelectorAll('.pill-label').forEach(l => l.classList.remove('active'));
+  const active = (id) => document.getElementById(id)?.classList.add('active');
+  if (settings.tempUnit === 'celsius') active('pill-c'); else active('pill-f');
+  if (settings.windUnit === 'ms') active('pill-ms'); else active('pill-kmh');
+  if (settings.timeFormat === '24h') active('pill-24h'); else active('pill-12h');
+  document.getElementById('auto-location').checked = settings.autoLocation;
+  document.querySelectorAll(`[name="temp-unit"]`).forEach(r => r.checked = r.value === settings.tempUnit);
+  document.querySelectorAll(`[name="wind-unit"]`).forEach(r => r.checked = r.value === settings.windUnit);
+  document.querySelectorAll(`[name="time-format"]`).forEach(r => r.checked = r.value === settings.timeFormat);
+}
+
+// ── HELPERS ─────────────────────────────────────────────────────
+function getPixelIcon(code, isNight) {
+  const e = PIXEL_ICONS[String(code)] || PIXEL_ICONS['0'];
+  return PIXEL_BASE + (isNight ? e.night : e.day);
+}
+function convTemp(t) {
+  return settings.tempUnit === 'fahrenheit' ? ((t*9/5)+32).toFixed(1) : t.toFixed(1);
+}
+function unitLabel() { return settings.tempUnit === 'celsius' ? '°C' : '°F'; }
+function convWind(kmh) {
+  return settings.windUnit === 'ms'
+    ? { v: (kmh/3.6).toFixed(1), u: 'm/s' }
+    : { v: kmh.toFixed(1), u: 'km/h' };
+}
+function isNight(tz) {
+  const h = parseInt(new Date().toLocaleTimeString('en-US',{timeZone:tz,hour12:false}).split(':')[0]);
+  return h >= 18 || h < 6;
+}
+function fmtHour(iso) {
+  const h = new Date(iso).getHours();
+  if (settings.timeFormat === '12h') {
+    return `${h%12||12}${h>=12?'PM':'AM'}`;
+  }
+  return `${h}h`;
+}
+function setBackground(code) {
+  const info = WEATHER_INFO[code] || WEATHER_INFO[0];
+  document.getElementById('weather-bg').style.background =
+    `linear-gradient(160deg, ${info.bg[0]}, ${info.bg[1]})`;
+  document.querySelector('meta[name="theme-color"]').content = info.bg[0];
+}
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours(), m = String(now.getMinutes()).padStart(2,'0');
+  let str = settings.timeFormat === '12h'
+    ? `${h%12||12}:${m} ${h>=12?'PM':'AM'}`
+    : `${String(h).padStart(2,'0')}:${m}`;
+  document.getElementById('topbar-clock').textContent = str;
+  const iconFile = (h >= 6 && h < 18) ? 'clear_day.png' : 'clear_night.png';
+  document.getElementById('topbar-icon').src = PIXEL_BASE + iconFile;
+}
+
+// ── UI STATES ────────────────────────────────────────────────────
+function showLoading() {
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('error-msg').classList.add('hidden');
+  document.getElementById('weather-content').classList.add('hidden');
+}
+function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
+function showError(msg) {
+  hideLoading();
+  const el = document.getElementById('error-msg');
+  el.innerHTML = `⚠️ ${msg}`;
+  el.classList.remove('hidden');
+}
+
+// ── DISPLAY ──────────────────────────────────────────────────────
+function displayWeather(cur, daily, hourly, city, timezone) {
+  hideLoading();
+  document.getElementById('error-msg').classList.add('hidden');
+  document.getElementById('weather-content').classList.remove('hidden');
+
+  const code = cur.weather_code;
+  const night = isNight(timezone);
+  const info = WEATHER_INFO[code] || { text: 'Không rõ', bg: ['#1a202c','#2d3748'] };
+
+  setBackground(code);
+
+  // Hero
+  document.getElementById('city-name').textContent = city;
+  document.getElementById('weather-desc').textContent = info.text;
+  document.getElementById('main-weather-icon').src = getPixelIcon(code, night);
+  document.getElementById('main-temp').textContent = convTemp(cur.temperature_2m) + unitLabel();
+  const todayMax = convTemp(daily.temperature_2m_max[0]);
+  const todayMin = convTemp(daily.temperature_2m_min[0]);
+  document.getElementById('temp-hi').textContent = `↑ ${todayMax}°`;
+  document.getElementById('temp-lo').textContent = `↓ ${todayMin}°`;
+
+  // Details
+  const wind = convWind(cur.wind_speed_10m);
+  const vis = (cur.visibility/1000).toFixed(1);
+  const uv = daily.uv_index_max?.[0] ?? 'N/A';
+  document.getElementById('details-card').innerHTML = `
+    <div class="detail-tile">
+      <span class="material-symbols-outlined">humidity_mid</span>
+      <div class="detail-info"><div class="detail-label">Độ ẩm</div><div class="detail-val">${cur.relative_humidity_2m}%</div></div>
+    </div>
+    <div class="detail-tile">
+      <span class="material-symbols-outlined">air</span>
+      <div class="detail-info"><div class="detail-label">Gió</div><div class="detail-val">${wind.v} ${wind.u}</div></div>
+    </div>
+    <div class="detail-tile">
+      <span class="material-symbols-outlined">wb_sunny</span>
+      <div class="detail-info"><div class="detail-label">Chỉ số UV</div><div class="detail-val">${uv}</div></div>
+    </div>
+    <div class="detail-tile">
+      <span class="material-symbols-outlined">visibility</span>
+      <div class="detail-info"><div class="detail-label">Tầm nhìn</div><div class="detail-val">${vis} km</div></div>
+    </div>
+  `;
+
+  // Hourly
+  const hourlyEl = document.getElementById('hourly-scroll');
+  hourlyEl.innerHTML = '';
+  const nowTime = new Date();
+  let count = 0;
+  for (let i = 0; i < hourly.time.length && count < 24; i++) {
+    const t = new Date(hourly.time[i]);
+    if (t < nowTime && i < hourly.time.length - 1) continue;
+    count++;
+    const isNow = count === 1;
+    const hCode = hourly.weather_code[i];
+    const hh = t.getHours();
+    const hNight = hh >= 18 || hh < 6;
+    hourlyEl.innerHTML += `
+      <div class="hourly-card ${isNow ? 'now-card' : ''}">
+        <div class="hourly-time">${isNow ? 'Ngay\ngiờ' : fmtHour(hourly.time[i])}</div>
+        <img class="hourly-icon" src="${getPixelIcon(hCode, hNight)}" alt="">
+        <div class="hourly-temp">${convTemp(hourly.temperature_2m[i])}°</div>
+      </div>
+    `;
+  }
+
+  // Daily
+  const dailyEl = document.getElementById('daily-list');
+  dailyEl.innerHTML = '';
+  const allMax = daily.temperature_2m_max.slice(1,7);
+  const allMin = daily.temperature_2m_min.slice(1,7);
+  const globalMax = Math.max(...allMax);
+  const globalMin = Math.min(...allMin);
+  const range = globalMax - globalMin || 1;
+
+  for (let i = 1; i < 7; i++) {
+    const date = new Date(daily.time[i]);
+    const dayName = date.toLocaleDateString('vi-VN', { weekday: 'short' });
+    const dCode = daily.weather_code[i];
+    const maxT = daily.temperature_2m_max[i];
+    const minT = daily.temperature_2m_min[i];
+    const barLeft = ((minT - globalMin) / range * 100).toFixed(1);
+    const barWidth = ((maxT - minT) / range * 100).toFixed(1);
+    dailyEl.innerHTML += `
+      <div class="daily-row">
+        <div class="daily-day">${dayName}</div>
+        <img class="daily-icon" src="${getPixelIcon(dCode, false)}" alt="">
+        <div class="daily-bar-wrap">
+          <div class="daily-lo">${convTemp(minT)}°</div>
+          <div class="temp-bar">
+            <div class="temp-bar-fill" style="margin-left:${barLeft}%;width:${barWidth}%"></div>
+          </div>
+          <div class="daily-hi">${convTemp(maxT)}°</div>
+        </div>
+      </div>
+    `;
+  }
+
+  try { localStorage.setItem('wx_mob_last', JSON.stringify({ lat: null, lon: null, city })); } catch(e) {}
+}
+
+// ── FETCH ────────────────────────────────────────────────────────
+async function fetchByCity(cityName) {
+  showLoading();
+  try {
+    const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=vi&format=json`).then(r=>r.json());
+    if (!geo.results?.length) throw new Error('Không tìm thấy thành phố này!');
+    const { latitude: lat, longitude: lon, name, country } = geo.results[0];
+    await fetchByCoords(lat, lon, `${name}, ${country}`);
+  } catch(e) { showError(e.message || 'Lỗi kết nối!'); }
+}
+
+async function fetchByCoords(lat, lon, cityName = null) {
+  try {
+    if (!cityName) {
+      const geo = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=vi`).then(r=>r.json());
+      cityName = geo.city || geo.principalSubdivision || 'Vị trí hiện tại';
+    }
+    const wx = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+      `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,visibility` +
+      `&hourly=temperature_2m,weather_code` +
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max` +
+      `&timezone=auto&forecast_days=7`
+    ).then(r=>r.json());
+    displayWeather(wx.current, wx.daily, wx.hourly, cityName, wx.timezone);
+    try { localStorage.setItem('wx_mob_last_coords', JSON.stringify({lat,lon,cityName})); } catch(e) {}
+  } catch(e) { showError('Lỗi kết nối. Kiểm tra mạng và thử lại!'); }
+}
+
+async function getLocation() {
+  if (!navigator.geolocation) {
+    showError('Trình duyệt của bạn không hỗ trợ GPS 😢');
+    return;
+  }
+
+  // Kiểm tra trạng thái quyền trước (nếu browser hỗ trợ Permissions API)
+  if (navigator.permissions) {
+    try {
+      const status = await navigator.permissions.query({ name: 'geolocation' });
+
+      if (status.state === 'denied') {
+        showError('Bạn đã từ chối quyền GPS 🚫<br><small>Vào Cài đặt trình duyệt → Quyền riêng tư → Vị trí để bật lại nhé!</small>');
+        return;
+      }
+
+      // Lắng nghe nếu user thay đổi quyền sau khi popup hiện
+      status.onchange = () => {
+        if (status.state === 'granted') requestGPS();
+        else if (status.state === 'denied') {
+          showError('Quyền GPS bị từ chối 🚫<br><small>Vào Cài đặt trình duyệt để bật lại nhé!</small>');
+        }
+      };
+    } catch(e) {
+      // Một số browser không hỗ trợ permissions.query → bỏ qua, gọi thẳng
+    }
+  }
+
+  requestGPS();
+}
+
+function requestGPS() {
+  showLoading();
+
+  const options = {
+    enableHighAccuracy: true,   // Xin GPS chính xác cao
+    timeout: 10000,             // Chờ tối đa 10 giây
+    maximumAge: 60000           // Dùng cache vị trí nếu < 1 phút
+  };
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      fetchByCoords(pos.coords.latitude, pos.coords.longitude);
+    },
+    err => {
+      let msg = 'Không lấy được vị trí 😕';
+      switch(err.code) {
+        case err.PERMISSION_DENIED:
+          msg = 'Bạn chưa cho phép quyền GPS 📍<br><small>Bấm vào icon 🔒 trên thanh địa chỉ → Cho phép "Vị trí"</small>';
+          break;
+        case err.POSITION_UNAVAILABLE:
+          msg = 'Không xác định được vị trí 📡<br><small>Thử bật WiFi hoặc ra ngoài trời để GPS bắt sóng tốt hơn</small>';
+          break;
+        case err.TIMEOUT:
+          msg = 'GPS phản hồi quá chậm ⏱️<br><small>Thử lại sau vài giây nhé!</small>';
+          break;
+      }
+      showError(msg);
+    },
+    options
+  );
+}
+
+// ── SUGGESTIONS ──────────────────────────────────────────────────
+async function fetchSuggestions(q) {
+  const list = document.getElementById('suggestions');
+  if (q.length < 2) { list.classList.add('hidden'); return; }
+  try {
+    const data = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=vi&format=json`).then(r=>r.json());
+    list.innerHTML = '';
+    if (data.results?.length) {
+      data.results.forEach(r => {
+        const li = document.createElement('li');
+        li.textContent = `${r.name}, ${r.country}`;
+        li.addEventListener('click', () => {
+          document.getElementById('city-input').value = li.textContent;
+          list.classList.add('hidden');
+          fetchByCity(r.name);
         });
-    });
-</script>
+        list.appendChild(li);
+      });
+      list.classList.remove('hidden');
+    } else list.classList.add('hidden');
+  } catch(e) { list.classList.add('hidden'); }
+}
 
+// ── INIT ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadSettings();
+  applyPills();
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  // Load last saved
+  try {
+    const last = localStorage.getItem('wx_mob_last_coords');
+    if (last) {
+      const { lat, lon, cityName } = JSON.parse(last);
+      if (lat && lon) fetchByCoords(lat, lon, cityName);
+      else if (cityName) fetchByCity(cityName);
+    }
+  } catch(e) {}
+
+  if (settings.autoLocation) getLocation();
+
+  // Search
+  const cityInput = document.getElementById('city-input');
+  document.getElementById('search-btn').addEventListener('click', () => {
+    const v = cityInput.value.trim();
+    if (v) { document.getElementById('suggestions').classList.add('hidden'); fetchByCity(v); }
+  });
+  cityInput.addEventListener('keydown', e => { if (e.key === 'Enter') { document.getElementById('search-btn').click(); cityInput.blur(); } });
+  cityInput.addEventListener('input', e => fetchSuggestions(e.target.value.trim()));
+
+  // Buttons
+  document.getElementById('location-btn').addEventListener('click', getLocation);
+  document.getElementById('refresh-btn').addEventListener('click', () => {
+    try {
+      const last = localStorage.getItem('wx_mob_last_coords');
+      if (last) { const { lat, lon, cityName } = JSON.parse(last); fetchByCoords(lat, lon, cityName); }
+      else if (settings.autoLocation) getLocation();
+    } catch(e) {}
+    // Spin animation
+    const btn = document.getElementById('refresh-btn').querySelector('span');
+    btn.style.transition = 'transform 0.5s';
+    btn.style.transform = 'rotate(360deg)';
+    setTimeout(() => { btn.style.transition = ''; btn.style.transform = ''; }, 500);
+  });
+
+  // Settings
+  document.getElementById('settings-btn').addEventListener('click', () => {
+    document.getElementById('settings-panel').classList.toggle('hidden');
+    const icon = document.getElementById('settings-btn').querySelector('span');
+    const isOpen = !document.getElementById('settings-panel').classList.contains('hidden');
+    icon.textContent = isOpen ? 'close' : 'settings';
+  });
+
+  document.getElementById('settings-panel').addEventListener('change', e => {
+    const t = e.target;
+    if (t.name === 'temp-unit') settings.tempUnit = t.value;
+    else if (t.name === 'wind-unit') settings.windUnit = t.value;
+    else if (t.name === 'time-format') { settings.timeFormat = t.value; updateClock(); }
+    else if (t.id === 'auto-location') { settings.autoLocation = t.checked; if (t.checked) getLocation(); }
+    saveSettings();
+    applyPills();
+    // Re-render
+    try {
+      const last = localStorage.getItem('wx_mob_last_coords');
+      if (last) { const { lat, lon, cityName } = JSON.parse(last); fetchByCoords(lat, lon, cityName); }
+    } catch(e) {}
+  });
+
+  // Close suggestions on outside tap
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap')) document.getElementById('suggestions').classList.add('hidden');
+  });
+});
+</script>
 </body>
 </html>
